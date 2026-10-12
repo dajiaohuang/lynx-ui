@@ -11,7 +11,6 @@ import {
   SheetRoot,
   SheetView,
   useSheetScrollGesture,
-  useSheetScrollHandlers,
 } from '@lynx-js/lynx-ui'
 import type { SheetRootRef } from '@lynx-js/lynx-ui'
 
@@ -40,7 +39,6 @@ function HorizontalCategories() {
 
 function FoldLikeContent() {
   const verticalGesture = useSheetScrollGesture()
-  const scrollHandlers = useSheetScrollHandlers()
 
   return (
     <scroll-view
@@ -48,9 +46,6 @@ function FoldLikeContent() {
       scroll-orientation='vertical'
       bounces={false}
       main-thread:gesture={verticalGesture}
-      onScroll={scrollHandlers.onScroll}
-      onScrollToUpper={scrollHandlers.onScrollToUpper}
-      onScrollToLower={scrollHandlers.onScrollToLower}
     >
       <view className='fold-toolbar'>
         <text className='fold-toolbar-title'>Primary vertical owner</text>

@@ -10,10 +10,19 @@
  */
 export function computeAtStartFromScroll(
   resolvedSide: 'top' | 'bottom' | 'left' | 'right',
-  e: { detail?: { scrollTop?: number, scrollLeft?: number } },
+  e: {
+    detail?: {
+      scrollTop?: number
+      scrollLeft?: number
+      scrollX?: number
+      scrollY?: number
+    }
+  },
 ): boolean | undefined {
   const isHorizontal = resolvedSide === 'left' || resolvedSide === 'right'
-  const offset = isHorizontal ? e.detail?.scrollLeft : e.detail?.scrollTop
+  const offset = isHorizontal
+    ? (e.detail?.scrollX ?? e.detail?.scrollLeft)
+    : (e.detail?.scrollY ?? e.detail?.scrollTop)
   if (offset === undefined) return undefined
   return offset <= 0
 }

@@ -11,7 +11,6 @@ import {
   SheetRoot,
   SheetView,
   useSheetScrollGesture,
-  useSheetScrollHandlers,
 } from '@lynx-js/lynx-ui'
 import type { SheetRootRef } from '@lynx-js/lynx-ui'
 
@@ -20,7 +19,6 @@ import './index.css'
 
 function NestedList() {
   const gesture = useSheetScrollGesture()
-  const scrollHandlers = useSheetScrollHandlers()
   return (
     <list
       className='nested-list'
@@ -29,9 +27,6 @@ function NestedList() {
       span-count={1}
       bounces={false}
       main-thread:gesture={gesture}
-      onScroll={scrollHandlers.onScroll}
-      onScrollToUpper={scrollHandlers.onScrollToUpper}
-      onScrollToLower={scrollHandlers.onScrollToLower}
     >
       {Array.from(
         { length: 30 },

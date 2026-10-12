@@ -23,6 +23,13 @@ describe('computeAtStartFromScroll', () => {
       .toBe(false)
   })
 
+  it('vertical sheet: supports Lynx scrollY events', () => {
+    expect(computeAtStartFromScroll('bottom', { detail: { scrollY: 0 } }))
+      .toBe(true)
+    expect(computeAtStartFromScroll('bottom', { detail: { scrollY: 50 } }))
+      .toBe(false)
+  })
+
   it('horizontal sheet: atStart when scrollLeft <= 0', () => {
     expect(computeAtStartFromScroll('left', { detail: { scrollLeft: 0 } }))
       .toBe(true)
@@ -32,6 +39,13 @@ describe('computeAtStartFromScroll', () => {
 
   it('horizontal sheet: not atStart when scrollLeft > 0', () => {
     expect(computeAtStartFromScroll('left', { detail: { scrollLeft: 30 } }))
+      .toBe(false)
+  })
+
+  it('horizontal sheet: supports Lynx scrollX events', () => {
+    expect(computeAtStartFromScroll('left', { detail: { scrollX: 0 } }))
+      .toBe(true)
+    expect(computeAtStartFromScroll('right', { detail: { scrollX: 30 } }))
       .toBe(false)
   })
 

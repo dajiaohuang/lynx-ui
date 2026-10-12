@@ -11,7 +11,6 @@ import {
   useSheetNativeScrollGesture,
   useSheetPanGesture,
 } from '../hooks/useSheetGestures'
-import { useSheetScrollHandlers } from '../hooks/useSheetScrollHandlers'
 import { SheetSurface } from '../SheetSurface'
 import type { SheetGestureContentProps } from '../types'
 
@@ -59,9 +58,8 @@ export function SheetGestureContent(props: SheetGestureContentProps) {
     position: snap.yRef,
     getResolvedSnapOffsets: snap.getResolvedSnapOffsets,
   })
-  const scrollHandlers = useSheetScrollHandlers()
   const resolvedChildren = typeof children === 'function'
-    ? children({ scrollGesture, scrollHandlers })
+    ? children({ scrollGesture })
     : children
 
   return (

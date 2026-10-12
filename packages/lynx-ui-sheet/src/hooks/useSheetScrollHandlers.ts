@@ -7,15 +7,22 @@ import { runOnMainThread, useCallback } from '@lynx-js/react'
 import { useSheetContext, useSheetGestureContext } from '../context'
 import { computeAtStartFromScroll } from './scrollBoundary'
 
+export interface SheetScrollEvent {
+  detail?: {
+    scrollTop?: number
+    scrollLeft?: number
+    scrollX?: number
+    scrollY?: number
+  }
+}
+
 export interface SheetScrollHandlers {
   /**
    * Spread onto the ScrollView that contains the sheet content.
    * Feeds scroll boundary info back to the sheet gesture so the nested
    * scroll → sheet collapse handoff works reliably.
    */
-  onScroll: (
-    e: { detail?: { scrollTop?: number, scrollLeft?: number } },
-  ) => void
+  onScroll: (event: SheetScrollEvent) => void
   onScrollToUpper: () => void
   onScrollToLower: () => void
 }
@@ -24,9 +31,11 @@ export interface SheetScrollHandlers {
  * Background-thread scroll boundary handlers that bridge ScrollView scroll
  * events into the main-thread sheet gesture state.
  *
- * Use this when attaching the sheet scroll gesture to a ScrollView via
- * `useSheetScrollGesture()` directly (outside the SheetGestureContent render
- * prop). Spread the returned handlers onto the same ScrollView.
+ * Use this only when the native scrolling component does not synchronously
+ * expose its start boundary through the gesture event, or when an application
+ * already handles scroll events and wants to feed those explicit boundaries
+ * into the Sheet. Standard ScrollView and List integrations only need
+ * `useSheetScrollGesture()`.
  *
  * The handlers update both a persistent boundary ref (survives across touches)
  * and the active gesture state (for the current touch). The persistent value
@@ -35,13 +44,23 @@ export interface SheetScrollHandlers {
  *
  * @example
  * ```tsx
- * const scrollGesture = useSheetScrollGesture()
- * const scrollHandlers = useSheetScrollHandlers()
- * return (
- *   <ScrollView main-thread:gesture={scrollGesture} {...scrollHandlers}>
- *     ...
- *   </ScrollView>
- * )
+ * function CustomScrollContent() {
+ *   const scrollGesture = useSheetScrollGesture()
+ *   const scrollHandlers = useSheetScrollHandlers()
+ *   return (
+ *     <ScrollView
+ *       main-thread:gesture={scrollGesture}
+ *       onScroll={(event) => {
+ *         scrollHandlers.onScroll(event)
+ *         trackScroll(event)
+ *       }}
+ *       onScrollToUpper={scrollHandlers.onScrollToUpper}
+ *       onScrollToLower={scrollHandlers.onScrollToLower}
+ *     >
+ *       ...
+ *     </ScrollView>
+ *   )
+ * }
  * ```
  */
 export function useSheetScrollHandlers(): SheetScrollHandlers {
@@ -69,8 +88,8 @@ export function useSheetScrollHandlers(): SheetScrollHandlers {
   )
 
   const onScroll = useCallback(
-    (e: { detail?: { scrollTop?: number, scrollLeft?: number } }) => {
-      const atStart = computeAtStartFromScroll(resolvedSide, e)
+    (event: SheetScrollEvent) => {
+      const atStart = computeAtStartFromScroll(resolvedSide, event)
       if (atStart !== undefined) {
         setAtStart(atStart)
       }
