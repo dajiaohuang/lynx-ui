@@ -13,7 +13,7 @@ const defaultConfig = exampleConfig(
     SheetDirectional: './Directional/index.tsx',
     SheetImperative: './Imperative/index.tsx',
     SheetGestureScrollView: './GestureScrollView/index.tsx',
-    SheetGestureScrollEvents: './GestureScrollEvents/index.tsx',
+    SheetGestureCustomBoundary: './GestureCustomBoundary/index.tsx',
     SheetGestureList: './GestureList/index.tsx',
     SheetGestureFixedFooter: './GestureFixedFooter/index.tsx',
     SheetGestureComposite: './GestureComposite/index.tsx',

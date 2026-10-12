@@ -4,63 +4,52 @@
 
 import { root, useRef, useState } from '@lynx-js/react'
 
+import type { SheetRootRef } from '@lynx-js/lynx-ui'
 import {
   SheetBackdrop,
   SheetGestureContent,
   SheetHandle,
   SheetRoot,
   SheetView,
+  useSheetScrollBoundary,
   useSheetScrollGesture,
-  useSheetScrollHandlers,
 } from '@lynx-js/lynx-ui'
-import type { SheetRootRef } from '@lynx-js/lynx-ui'
 
 import { TriggerButton } from '../shared/index.js'
 import './index.css'
 
-interface ScrollEvent {
-  detail?: {
-    scrollTop?: number
-    scrollLeft?: number
-    scrollX?: number
-    scrollY?: number
-  }
-}
-
-function ScrollEventsContent() {
+/**
+ * Represents a custom scroll abstraction that owns gesture binding and reports
+ * only its start-boundary state to Sheet.
+ */
+function CustomScrollContainer() {
   const scrollGesture = useSheetScrollGesture()
-  const scrollHandlers = useSheetScrollHandlers()
-  const [status, setStatus] = useState('At start')
+  const { setAtStart } = useSheetScrollBoundary()
+  const [status, setStatus] = useState('Custom container at start')
 
   return (
     <>
-      <view className='event-status'>
-        <text className='event-status-label'>Scroll event status</text>
-        <text className='event-status-value'>{status}</text>
+      <view className='boundary-status'>
+        <text className='boundary-status-label'>Boundary adapter status</text>
+        <text className='boundary-status-value'>{status}</text>
       </view>
       <scroll-view
-        className='event-scroll'
+        className='custom-scroll'
         scroll-orientation='vertical'
         bounces={false}
         main-thread:gesture={scrollGesture}
-        onScroll={(event: ScrollEvent) => {
-          scrollHandlers.onScroll(event)
-          setStatus('Scrolling')
-        }}
+        onScroll={() => setStatus('Custom container scrolling')}
         onScrollToUpper={() => {
-          scrollHandlers.onScrollToUpper()
-          setStatus('Reached start')
+          setAtStart(true)
+          setStatus('Custom container at start')
         }}
-        onScrollToLower={() => {
-          scrollHandlers.onScrollToLower()
-          setStatus('Reached end')
-        }}
+        onScrollToNormalState={() => setAtStart(false)}
       >
         {Array.from(
           { length: 20 },
           (_, index) => (
-            <view className='event-row' key={index}>
-              <text>{`Event row ${index + 1}`}</text>
+            <view className='custom-row' key={index}>
+              <text>{`Custom row ${index + 1}`}</text>
             </view>
           ),
         )}
@@ -74,24 +63,23 @@ function App() {
 
   return (
     <view className='demo-container lunaris-dark'>
-      <text className='title-text'>Gesture Sheet + Scroll Events</text>
+      <text className='title-text'>Gesture Sheet + Custom Boundary</text>
       <text className='subtitle-text'>
-        Opt in to explicit boundary handlers while composing your own scroll
-        callbacks.
+        A custom scroll abstraction reports only whether it is at its start.
       </text>
       <TriggerButton
         onClick={() => sheetRef.current?.open()}
-        text='Open scroll-events Sheet'
+        text='Open custom-boundary Sheet'
       />
       <SheetRoot ref={sheetRef} snapPoints={['55%', '90%']} initialSnap={0}>
         <SheetView className='sheet-viewport'>
           <SheetBackdrop className='sheet-overlay' />
           <SheetGestureContent
             className='sheet-content'
-            innerClassName='event-sheet-inner'
+            innerClassName='custom-sheet-inner'
           >
             <SheetHandle className='sheet-handle' />
-            <ScrollEventsContent />
+            <CustomScrollContainer />
           </SheetGestureContent>
         </SheetView>
       </SheetRoot>

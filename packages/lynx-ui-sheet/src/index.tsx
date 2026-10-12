@@ -8,7 +8,7 @@ export { SheetContent } from './SheetContent'
 export { SheetGestureContent } from './SheetGestureContent'
 export { SheetHandle } from './SheetHandle'
 export { SheetView } from './SheetView'
-export { useSheetScrollGesture, useSheetScrollHandlers, useSnap } from './hooks'
+export { useSheetScrollBoundary, useSheetScrollGesture, useSnap } from './hooks'
 
 export type {
   SheetBackdropProps,

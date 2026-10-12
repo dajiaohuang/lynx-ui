@@ -86,8 +86,9 @@ export interface SheetGestureContextValue {
   scrollGesture?: GestureKind
   activeScrollMTRef?: MainThreadRef<ActiveSheetScrollGesture | null>
   /**
-   * Persistent scroll boundary state that survives across touches.
-   * Updated by scroll handlers; copied into active gesture state on onTouchesDown.
+   * Persistent start-boundary state reported by a custom scrolling container.
+   * Native ScrollView and List integrations normally provide this boundary
+   * through NativeGesture event params instead.
    */
   scrollBoundaryMTRef?: MainThreadRef<{ atStart?: boolean }>
 }

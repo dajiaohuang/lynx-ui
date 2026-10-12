@@ -8,11 +8,11 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const source = readFileSync(
-  resolve(__dirname, './useSheetScrollHandlers.ts'),
+  resolve(__dirname, './useSheetScrollBoundary.ts'),
   'utf-8',
 )
 
-describe('useSheetScrollHandlers main-thread bridge', () => {
+describe('useSheetScrollBoundary main-thread bridge', () => {
   it('uses a named main-thread worklet', () => {
     expect(source).toContain('function setAtStartMT(atStart: boolean)')
     expect(source).toContain('\'main thread\'')
