@@ -11,6 +11,7 @@ import {
   useSheetNativeScrollGesture,
   useSheetPanGesture,
 } from '../hooks/useSheetGestures'
+import { useSheetScrollHandlers } from '../hooks/useSheetScrollHandlers'
 import { SheetSurface } from '../SheetSurface'
 import type { SheetGestureContentProps } from '../types'
 
@@ -31,6 +32,7 @@ export function SheetGestureContent(props: SheetGestureContentProps) {
   const activeScrollMTRef = useMainThreadRef<ActiveSheetScrollGesture | null>(
     null,
   )
+  const scrollBoundaryMTRef = useMainThreadRef<{ atStart?: boolean }>({})
   const sheetGesture = useSheetPanGesture({
     side: context.side,
     enableRTL: context.enableRTL,
@@ -52,12 +54,14 @@ export function SheetGestureContent(props: SheetGestureContentProps) {
   const scrollGesture = useSheetNativeScrollGesture({
     sheetGesture,
     activeScrollMTRef,
+    scrollBoundaryMTRef,
     resolvedSide: context.resolvedSide,
     position: snap.yRef,
     getResolvedSnapOffsets: snap.getResolvedSnapOffsets,
   })
+  const scrollHandlers = useSheetScrollHandlers()
   const resolvedChildren = typeof children === 'function'
-    ? children({ scrollGesture })
+    ? children({ scrollGesture, scrollHandlers })
     : children
 
   return (
@@ -66,6 +70,7 @@ export function SheetGestureContent(props: SheetGestureContentProps) {
         sheetGesture,
         scrollGesture,
         activeScrollMTRef,
+        scrollBoundaryMTRef,
       }}
     >
       <SheetSurface

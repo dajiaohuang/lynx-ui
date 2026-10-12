@@ -43,7 +43,7 @@ function App() {
             className='sheet-content'
             innerClassName='gesture-sheet-inner'
           >
-            {({ scrollGesture }) => (
+            {({ scrollGesture, scrollHandlers }) => (
               <>
                 <SheetHandle className='sheet-handle' />
                 <view className='example-description'>
@@ -57,6 +57,9 @@ function App() {
                   scroll-orientation='vertical'
                   bounces={false}
                   main-thread:gesture={scrollGesture}
+                  onScroll={scrollHandlers.onScroll}
+                  onScrollToUpper={scrollHandlers.onScrollToUpper}
+                  onScrollToLower={scrollHandlers.onScrollToLower}
                 >
                   {Array.from({ length: 20 }, (_, index) => (
                     <view

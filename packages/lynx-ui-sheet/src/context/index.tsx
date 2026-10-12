@@ -85,6 +85,11 @@ export interface SheetGestureContextValue {
   sheetGesture?: GestureKind
   scrollGesture?: GestureKind
   activeScrollMTRef?: MainThreadRef<ActiveSheetScrollGesture | null>
+  /**
+   * Persistent scroll boundary state that survives across touches.
+   * Updated by scroll handlers; copied into active gesture state on onTouchesDown.
+   */
+  scrollBoundaryMTRef?: MainThreadRef<{ atStart?: boolean }>
 }
 
 // @ts-expect-error MT initialize is useless

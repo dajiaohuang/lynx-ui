@@ -11,6 +11,7 @@ import {
   SheetRoot,
   SheetView,
   useSheetScrollGesture,
+  useSheetScrollHandlers,
 } from '@lynx-js/lynx-ui'
 import type { SheetRootRef } from '@lynx-js/lynx-ui'
 
@@ -24,6 +25,7 @@ const paymentMethods = Array.from(
 
 function PaymentMethodList() {
   const gesture = useSheetScrollGesture()
+  const scrollHandlers = useSheetScrollHandlers()
 
   return (
     <scroll-view
@@ -31,6 +33,9 @@ function PaymentMethodList() {
       scroll-orientation='vertical'
       bounces={false}
       main-thread:gesture={gesture}
+      onScroll={scrollHandlers.onScroll}
+      onScrollToUpper={scrollHandlers.onScrollToUpper}
+      onScrollToLower={scrollHandlers.onScrollToLower}
     >
       {paymentMethods.map((method, index) => (
         <view className='payment-method' key={method}>

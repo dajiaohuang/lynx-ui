@@ -29,6 +29,10 @@ import {
   resolveSheetSide,
   rubberEffect,
 } from '../utils'
+import {
+  parseScrollInfoAtStart,
+  setupSheetScrollGestureRelations,
+} from './gestureRelations'
 import { resolveNestedScrollOwner } from './nestedScroll'
 import { getSheetScrollGesture } from './sheetScrollGesture'
 import type { SnappingOptions } from './useSnap'
@@ -64,6 +68,7 @@ interface UseSheetPanGestureOptions {
 interface UseSheetNativeScrollGestureOptions {
   sheetGesture: GestureKind
   activeScrollMTRef: MainThreadRef<ActiveSheetScrollGesture | null>
+  scrollBoundaryMTRef: MainThreadRef<{ atStart?: boolean }>
   resolvedSide: 'top' | 'bottom' | 'left' | 'right'
   position: MainThreadRef<MotionValue<number>>
   getResolvedSnapOffsets: () => number[]
@@ -109,7 +114,6 @@ export function useSheetPanGesture({
   const effectiveRubberBand = rubberBand ?? getDefaultRubberBand(resolvedSide)
   const lastCoordinateMTRef = useMainThreadRef(0)
   const draggingMTRef = useMainThreadRef(false)
-  const yieldedToContentMTRef = useMainThreadRef(false)
 
   pan
     .enabled(!dragDisabled && (gestureConfig?.enabled ?? true))
@@ -125,11 +129,9 @@ export function useSheetPanGesture({
         event.params,
       )
       draggingMTRef.current = false
-      yieldedToContentMTRef.current = false
     })
     .onUpdate((event: PanGestureChangeEvent, manager: StateManager) => {
       'main thread'
-      if (yieldedToContentMTRef.current) return
       const coordinate = getMainAxisGestureCoordinate(
         resolvedSide,
         event.params,
@@ -156,7 +158,6 @@ export function useSheetPanGesture({
         if (owner === 'content') {
           // Once content takes over, do not snap the Sheet from stale velocity.
           draggingMTRef.current = false
-          yieldedToContentMTRef.current = true
           scroll.manager?.consumeGesture(true)
           manager.fail()
           return
@@ -193,10 +194,6 @@ export function useSheetPanGesture({
     })
     .onEnd(() => {
       'main thread'
-      if (yieldedToContentMTRef.current) {
-        yieldedToContentMTRef.current = false
-        return
-      }
       if (!draggingMTRef.current) return
       draggingMTRef.current = false
       const offsets = getResolvedSnapOffsets()
@@ -245,7 +242,7 @@ export function useSheetPanGesture({
 }
 
 type NativeScrollParams = NativeGestureChangeEvent['params'] & {
-  isAtStart?: boolean
+  isAtStart?: boolean | number
   scrollX?: number
   scrollY?: number
 }
@@ -258,15 +255,17 @@ function getDefaultScrollStartBoundary(
   const scrollOffset = resolvedSide === 'left' || resolvedSide === 'right'
     ? params.scrollX
     : params.scrollY
-  return params.isAtStart ?? (scrollOffset === undefined
-    ? undefined
-    : scrollOffset <= 0)
+  if (params.isAtStart !== undefined) {
+    return params.isAtStart === true || params.isAtStart === 1
+  }
+  return scrollOffset === undefined ? undefined : scrollOffset <= 0
 }
 
 /** Create the NativeGesture shared by SheetGestureContent descendants. */
 export function useSheetNativeScrollGesture({
   sheetGesture,
   activeScrollMTRef,
+  scrollBoundaryMTRef,
   resolvedSide,
   position,
   getResolvedSnapOffsets,
@@ -290,18 +289,55 @@ export function useSheetNativeScrollGesture({
         resolvedSide,
         params,
       )
-      scrollStateMTRef.current = {
+      // Seed atStart from gesture params when available, otherwise fall back
+      // to the persistent boundary value (from scroll handlers). This ensures
+      // the collapse handoff works even when the native gesture event params
+      // don't reliably supply isAtStart/scrollY.
+      const boundaryFromParams = getDefaultScrollStartBoundary(
+        resolvedSide,
+        params,
+      )
+      const capturedState = {
         manager,
-        atStart: getDefaultScrollStartBoundary(resolvedSide, params),
+        atStart: boundaryFromParams ?? scrollBoundaryMTRef.current.atStart,
       }
-      activeScrollMTRef.current = scrollStateMTRef.current
+      scrollStateMTRef.current = capturedState
+      activeScrollMTRef.current = capturedState
+      // Async cold seed: query actual scroll position to confirm boundary.
+      // Updates persistent ref always; updates active state only if still
+      // the same touch (guards against stale promises from prior touches).
+      void (event.currentTarget as {
+        invoke: (m: string) => Promise<{ scrollX?: number, scrollY?: number }>
+      })
+        .invoke('getScrollInfo')
+        .then((info) => {
+          'main thread'
+          const atStart = parseScrollInfoAtStart(resolvedSide, info)
+          if (atStart === undefined) return
+          scrollBoundaryMTRef.current.atStart = atStart
+          // Only update active state if this promise belongs to current touch
+          if (activeScrollMTRef.current === capturedState) {
+            capturedState.atStart = atStart
+          }
+        })
+        .catch(() => {
+          'main thread'
+        })
     })
     .onUpdate((event, manager) => {
       'main thread'
       const params = event.params as NativeScrollParams
       const state = scrollStateMTRef.current
       if (!state) return
-      state.atStart = getDefaultScrollStartBoundary(resolvedSide, params)
+      // Only overwrite atStart when gesture params explicitly supply a value.
+      // Preserve the externally fed boundary (from scroll handlers) otherwise.
+      const boundaryFromParams = getDefaultScrollStartBoundary(
+        resolvedSide,
+        params,
+      )
+      if (boundaryFromParams !== undefined) {
+        state.atStart = boundaryFromParams
+      }
       const coordinate = getMainAxisGestureCoordinate(resolvedSide, params)
       const rawDelta = coordinate - lastCoordinateMTRef.current
       lastCoordinateMTRef.current = coordinate
@@ -334,9 +370,7 @@ export function useSheetNativeScrollGesture({
       scrollStateMTRef.current = null
     })
 
-  if (!(nativeGesture.waitFor as GestureKind[]).includes(sheetGesture)) {
-    nativeGesture.externalWaitFor(sheetGesture)
-  }
+  setupSheetScrollGestureRelations(nativeGesture, sheetGesture)
   return nativeGesture
 }
 

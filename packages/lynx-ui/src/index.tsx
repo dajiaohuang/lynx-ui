@@ -289,6 +289,7 @@ export {
   SheetView,
   useSnap,
   useSheetScrollGesture,
+  useSheetScrollHandlers,
 } from '@lynx-js/lynx-ui-sheet'
 export type {
   SheetBackdropProps,

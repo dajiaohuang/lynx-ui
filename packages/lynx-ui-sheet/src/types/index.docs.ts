@@ -161,6 +161,18 @@ export interface SheetGestureRenderProps {
    * node. This is the same object returned by useSheetScrollGesture().
    */
   scrollGesture: NativeGesture
+  /**
+   * Background-thread scroll boundary handlers to spread onto the same
+   * ScrollView. Feeds scroll boundary info back to the sheet gesture so the
+   * nested scroll → sheet collapse handoff works reliably.
+   */
+  scrollHandlers: {
+    onScroll: (
+      e: { detail?: { scrollTop?: number, scrollLeft?: number } },
+    ) => void
+    onScrollToUpper: () => void
+    onScrollToLower: () => void
+  }
 }
 
 /** A gesture-enabled replacement for SheetContent; all other parts are reused. */
