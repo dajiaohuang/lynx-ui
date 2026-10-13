@@ -5,23 +5,44 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
-const source = readFileSync(
-  resolve(__dirname, './useSheetScrollBoundary.ts'),
-  'utf-8',
-)
+import { useSheetScrollBoundary } from './useSheetScrollBoundary'
 
-describe('useSheetScrollBoundary main-thread bridge', () => {
-  it('uses a named main-thread worklet', () => {
-    expect(source).toContain('function setAtStartMT(atStart: boolean)')
-    expect(source).toContain('\'main thread\'')
-    expect(source).toContain('runOnMainThread(setAtStartMT)(atStart)')
+const context = vi.hoisted(() => ({
+  setScrollAtStart: undefined as undefined | ((value: boolean) => void),
+}))
+vi.mock('../context', () => ({ useSheetGestureContext: () => context }))
+
+describe('custom boundary owner command', () => {
+  it('forwards true and false to the owner without a descendant worklet', () => {
+    const command = vi.fn()
+    context.setScrollAtStart = command
+    const controller = useSheetScrollBoundary()
+    expect(controller.setAtStart).toBe(command)
+    controller.setAtStart(true)
+    controller.setAtStart(false)
+    expect(command.mock.calls).toEqual([[true], [false]])
+    context.setScrollAtStart = undefined
   })
 
-  it('does not serialize MainThreadRef objects as worklet arguments', () => {
-    expect(source).not.toMatch(
-      /runOnMainThread\([^)]*\)\((?:activeScrollMTRef|scrollBoundaryMTRef)\)/,
+  it('rejects use outside the owner provider', () => {
+    context.setScrollAtStart = undefined
+    expect(() => useSheetScrollBoundary()).toThrow('inside SheetGestureContent')
+  })
+
+  it('keeps the worklet and ref mutation inside the owning component', () => {
+    const owner = readFileSync(
+      resolve(__dirname, '../SheetGestureContent/index.tsx'),
+      'utf-8',
     )
+    const hook = readFileSync(
+      resolve(__dirname, './useSheetScrollBoundary.ts'),
+      'utf-8',
+    )
+    expect(owner).toContain('\'main thread\'')
+    expect(owner).toContain('runOnMainThread(setScrollAtStartMT)(atStart)')
+    expect(hook).not.toContain('runOnMainThread')
+    expect(hook).not.toContain('.current')
   })
 })

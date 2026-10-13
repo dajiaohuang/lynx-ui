@@ -91,6 +91,8 @@ export interface SheetGestureContextValue {
    * through NativeGesture event params instead.
    */
   scrollBoundaryMTRef?: MainThreadRef<{ atStart?: boolean }>
+  /** Background command implemented by the component that owns the refs. */
+  setScrollAtStart?: (atStart: boolean) => void
 }
 
 // @ts-expect-error MT initialize is useless

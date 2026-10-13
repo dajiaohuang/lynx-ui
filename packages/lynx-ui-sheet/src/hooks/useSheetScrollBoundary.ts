@@ -2,8 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-import { runOnMainThread, useCallback } from '@lynx-js/react'
-
 import { useSheetGestureContext } from '../context'
 
 export interface SheetScrollBoundaryController {
@@ -37,24 +35,11 @@ export interface SheetScrollBoundaryController {
  * ```
  */
 export function useSheetScrollBoundary(): SheetScrollBoundaryController {
-  const { activeScrollMTRef, scrollBoundaryMTRef } = useSheetGestureContext()
-
-  function setAtStartMT(atStart: boolean) {
-    'main thread'
-    if (scrollBoundaryMTRef) {
-      scrollBoundaryMTRef.current.atStart = atStart
-    }
-    if (activeScrollMTRef?.current) {
-      activeScrollMTRef.current.atStart = atStart
-    }
+  const { setScrollAtStart } = useSheetGestureContext()
+  if (!setScrollAtStart) {
+    throw new Error(
+      'useSheetScrollBoundary must be used inside SheetGestureContent',
+    )
   }
-
-  const setAtStart = useCallback(
-    (atStart: boolean) => {
-      runOnMainThread(setAtStartMT)(atStart)
-    },
-    [setAtStartMT],
-  )
-
-  return { setAtStart }
+  return { setAtStart: setScrollAtStart }
 }
