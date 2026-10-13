@@ -68,7 +68,6 @@ interface UseSheetPanGestureOptions {
 interface UseSheetNativeScrollGestureOptions {
   sheetGesture: GestureKind
   activeScrollMTRef: MainThreadRef<ActiveSheetScrollGesture | null>
-  scrollBoundaryMTRef: MainThreadRef<{ atStart?: boolean }>
   resolvedSide: 'top' | 'bottom' | 'left' | 'right'
   position: MainThreadRef<MotionValue<number>>
   getResolvedSnapOffsets: () => number[]
@@ -265,12 +264,12 @@ function getDefaultScrollStartBoundary(
 export function useSheetNativeScrollGesture({
   sheetGesture,
   activeScrollMTRef,
-  scrollBoundaryMTRef,
   resolvedSide,
   position,
   getResolvedSnapOffsets,
 }: UseSheetNativeScrollGestureOptions): NativeGesture {
   const nativeGesture = useGesture(NativeGesture)
+  const scrollBoundaryMTRef = useMainThreadRef<{ atStart?: boolean }>({})
   const lastCoordinateMTRef = useMainThreadRef(0)
   const scrollStateMTRef = useMainThreadRef<ActiveSheetScrollGesture | null>(
     null,
@@ -289,10 +288,8 @@ export function useSheetNativeScrollGesture({
         resolvedSide,
         params,
       )
-      // Seed atStart from gesture params when available, otherwise fall back
-      // to the persistent boundary value (from scroll handlers). This ensures
-      // the collapse handoff works even when the native gesture event params
-      // don't reliably supply isAtStart/scrollY.
+      // Use native gesture params when available, otherwise retain the last
+      // boundary sampled by this native scroll integration.
       const boundaryFromParams = getDefaultScrollStartBoundary(
         resolvedSide,
         params,
@@ -330,7 +327,7 @@ export function useSheetNativeScrollGesture({
       const state = scrollStateMTRef.current
       if (!state) return
       // Only overwrite atStart when gesture params explicitly supply a value.
-      // Preserve the externally fed boundary (from scroll handlers) otherwise.
+      // Otherwise retain the boundary sampled by the native integration.
       const boundaryFromParams = getDefaultScrollStartBoundary(
         resolvedSide,
         params,

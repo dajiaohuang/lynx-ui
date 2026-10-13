@@ -17,7 +17,7 @@ Use it when a UI needs a dismissible panel that slides from an edge of the viewp
 
 ## Nested Scroll Rules
 
-- Use `SheetGestureContent` when the content contains a `scroll-view`, `list`, FoldView, or another native scrolling node.
+- Use `SheetGestureContent` for nested native scrolling with `scroll-view` or `list`.
 - Prefer its render prop for a nearby scroll node: bind `scrollGesture` to the outermost vertical scrolling node with `main-thread:gesture`.
 - In deeply nested content, call the argument-free `useSheetScrollGesture()` Hook. It returns the same gesture object created by the nearest `SheetGestureContent`; it does not create or configure another gesture.
 - The ownership rule is fixed and directionally natural: upward drags expand the Sheet to its maximum snap before content scrolls; downward drags scroll content to its start before the Sheet collapses. Handoff can occur without lifting the finger.

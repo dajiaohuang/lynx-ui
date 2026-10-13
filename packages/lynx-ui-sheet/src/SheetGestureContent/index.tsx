@@ -2,7 +2,7 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-import { runOnMainThread, useCallback, useMainThreadRef } from '@lynx-js/react'
+import { useMainThreadRef } from '@lynx-js/react'
 
 import type { ActiveSheetScrollGesture } from '../context'
 import { SheetGestureContext } from '../context'
@@ -31,20 +31,6 @@ export function SheetGestureContent(props: SheetGestureContentProps) {
   const activeScrollMTRef = useMainThreadRef<ActiveSheetScrollGesture | null>(
     null,
   )
-  const scrollBoundaryMTRef = useMainThreadRef<{ atStart?: boolean }>({})
-
-  function setScrollAtStartMT(atStart: boolean) {
-    'main thread'
-    scrollBoundaryMTRef.current.atStart = atStart
-    if (activeScrollMTRef.current) {
-      activeScrollMTRef.current.atStart = atStart
-    }
-  }
-
-  const setScrollAtStart = useCallback((atStart: boolean) => {
-    runOnMainThread(setScrollAtStartMT)(atStart)
-  }, [setScrollAtStartMT])
-
   const sheetGesture = useSheetPanGesture({
     side: context.side,
     enableRTL: context.enableRTL,
@@ -66,7 +52,6 @@ export function SheetGestureContent(props: SheetGestureContentProps) {
   const scrollGesture = useSheetNativeScrollGesture({
     sheetGesture,
     activeScrollMTRef,
-    scrollBoundaryMTRef,
     resolvedSide: context.resolvedSide,
     position: snap.yRef,
     getResolvedSnapOffsets: snap.getResolvedSnapOffsets,
@@ -81,8 +66,6 @@ export function SheetGestureContent(props: SheetGestureContentProps) {
         sheetGesture,
         scrollGesture,
         activeScrollMTRef,
-        scrollBoundaryMTRef,
-        setScrollAtStart,
       }}
     >
       <SheetSurface

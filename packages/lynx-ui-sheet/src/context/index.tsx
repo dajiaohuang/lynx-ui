@@ -85,14 +85,6 @@ export interface SheetGestureContextValue {
   sheetGesture?: GestureKind
   scrollGesture?: GestureKind
   activeScrollMTRef?: MainThreadRef<ActiveSheetScrollGesture | null>
-  /**
-   * Persistent start-boundary state reported by a custom scrolling container.
-   * Native ScrollView and List integrations normally provide this boundary
-   * through NativeGesture event params instead.
-   */
-  scrollBoundaryMTRef?: MainThreadRef<{ atStart?: boolean }>
-  /** Background command implemented by the component that owns the refs. */
-  setScrollAtStart?: (atStart: boolean) => void
 }
 
 // @ts-expect-error MT initialize is useless

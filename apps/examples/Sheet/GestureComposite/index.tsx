@@ -50,7 +50,7 @@ function FoldLikeContent() {
       <view className='fold-toolbar'>
         <text className='fold-toolbar-title'>Primary vertical owner</text>
         <text className='fold-toolbar-copy'>
-          A real FoldView binds the returned gesture at this same level.
+          This native scroll-view coordinates vertical scrolling with the Sheet.
         </text>
       </view>
       <HorizontalCategories />

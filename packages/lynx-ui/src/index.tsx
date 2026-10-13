@@ -288,7 +288,6 @@ export {
   SheetHandle,
   SheetView,
   useSnap,
-  useSheetScrollBoundary,
   useSheetScrollGesture,
 } from '@lynx-js/lynx-ui-sheet'
 export type {
