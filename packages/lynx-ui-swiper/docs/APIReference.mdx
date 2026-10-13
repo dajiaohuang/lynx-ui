@@ -1,10 +1,13 @@
 import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
 
+<!-- cspell:disable -->
 
-  
+
+
 ## SwiperProps
-    
-  
+
+
+
 <UIApiTable source={[
   {
     "name": "autoPlay",
@@ -96,7 +99,7 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
   },
   {
     "name": "children",
-    "type": "(prop: {index: number, item: T, realIndex: number}) => ReactElement",
+    "type": "(prop: RenderFunctionProps<T>) => ReactElement",
     "summary": [
       {
         "kind": "text",
@@ -118,7 +121,7 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
   },
   {
     "name": "consumeSlideEvent",
-    "type": "undefined[]",
+    "type": "[number, number][]",
     "summary": [
       {
         "kind": "text",
@@ -404,19 +407,7 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
   },
   {
     "name": "offsetLimit",
-    "type": {
-      "type": "tuple",
-      "elements": [
-        {
-          "type": "intrinsic",
-          "name": "number"
-        },
-        {
-          "type": "intrinsic",
-          "name": "number"
-        }
-      ]
-    },
+    "type": "[number, number]",
     "summary": [
       {
         "kind": "text",
@@ -661,7 +652,7 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
     "docTypeFallback": null
   }
 ]}/>
-      
+
 
 ### RenderFunctionProps
 
@@ -734,8 +725,8 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
     "docTypeFallback": null
   }
 ]}/>
-    
-      
+
+
 
 ### BounceConfig
 
@@ -765,7 +756,7 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
   },
   {
     "name": "endBounceItem",
-    "type": "ReactElement",
+    "type": "ReactElement<any, string | JSXElementConstructor<any>>",
     "summary": [
       {
         "kind": "text",
@@ -809,7 +800,7 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
   },
   {
     "name": "onEndBounceItemBounce",
-    "type": "(bounceParams: {offset: number, type: start | end}) => void",
+    "type": "(bounceParams: onBounceParams) => void",
     "summary": [
       {
         "kind": "text",
@@ -831,7 +822,7 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
   },
   {
     "name": "onStartBounceItemBounce",
-    "type": "(bounceParams: {offset: number, type: start | end}) => void",
+    "type": "(bounceParams: onBounceParams) => void",
     "summary": [
       {
         "kind": "text",
@@ -853,7 +844,7 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
   },
   {
     "name": "startBounceItem",
-    "type": "ReactElement",
+    "type": "ReactElement<any, string | JSXElementConstructor<any>>",
     "summary": [
       {
         "kind": "text",
@@ -896,8 +887,8 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
     "docTypeFallback": null
   }
 ]}/>
-    
-      
+
+
 
 ### onBounceParams
 
@@ -928,8 +919,8 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
     "docTypeFallback": null
   }
 ]}/>
-    
-      
+
+
 
 ### SwipeToOptions
 
@@ -960,10 +951,13 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
     "docTypeFallback": null
   }
 ]}/>
-    
-      
+
+
 
 ## SwiperRef
+
+
+
 <UIApiTable source={[
   {
     "name": "cancelAnimation",
@@ -1033,7 +1027,7 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
   },
   {
     "name": "swipeTo",
-    "type": "(index: number, options: {animate?: boolean, onFinished?: () => void}) => void",
+    "type": "(index: number, options: SwipeToOptions) => void",
     "summary": [
       {
         "kind": "text",
@@ -1054,5 +1048,3 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
     "docTypeFallback": null
   }
 ]}/>
-  
-  

@@ -1,9 +1,12 @@
 import { UIApiTable, ClassRenderPropTable, ClassRenderPropPreamble } from "@lynx-ui/index";
 
-  
-### DialogRoot 
-    The root component of the Dialog, containing all of its child components.
-  
+<!-- cspell:disable -->
+
+
+### DialogRoot
+
+The root component of the Dialog, containing all of its child components.
+
 <UIApiTable source={[
   {
     "name": "debugLog",
@@ -176,11 +179,11 @@ import { UIApiTable, ClassRenderPropTable, ClassRenderPropPreamble } from "@lynx
     "docTypeFallback": null
   }
 ]}/>
-      
+
 <UIApiTable source={[
   {
     "name": "children",
-    "type": "ReactNode | (status: {animating?: boolean, closed?: boolean, entering?: boolean, leaving?: boolean, open?: boolean}) => ReactNode",
+    "type": "ReactNode | (status: PresenceAnimationStatus) => ReactNode",
     "summary": [
       {
         "kind": "text",
@@ -249,11 +252,12 @@ import { UIApiTable, ClassRenderPropTable, ClassRenderPropPreamble } from "@lynx
     }
   }
 ]}/>
-      
 
-### DialogBackdrop 
-    The backdrop mask of the dialog.
-  
+
+### DialogBackdrop
+
+The backdrop mask of the dialog.
+
 <UIApiTable source={[
   {
     "name": "children",
@@ -496,11 +500,12 @@ import { UIApiTable, ClassRenderPropTable, ClassRenderPropPreamble } from "@lynx
     "docTypeFallback": null
   }
 ]}/>
-      
 
-### DialogView 
-    View container. When 'container' is set correctly, the underlying layer will be replaced with overlay; otherwise, it will be a regular view. When the underlying layer is overlay, the 'level' property can be used to control the hierarchical relationship. For a regular view, use 'z-index' to control the hierarchical relationship. If this dialog needs to be used outside of LynxView, consider enabling overlay.
-  
+
+### DialogView
+
+View container. When 'container' is set correctly, the underlying layer will be replaced with overlay; otherwise, it will be a regular view. When the underlying layer is overlay, the 'level' property can be used to control the hierarchical relationship. For a regular view, use 'z-index' to control the hierarchical relationship. If this dialog needs to be used outside of LynxView, consider enabling overlay.
+
 <UIApiTable source={[
   {
     "name": "className",
@@ -679,11 +684,11 @@ import { UIApiTable, ClassRenderPropTable, ClassRenderPropPreamble } from "@lynx
     "docTypeFallback": null
   }
 ]}/>
-      
+
 <UIApiTable source={[
   {
     "name": "children",
-    "type": "ReactNode | (status: {animating?: boolean, closed?: boolean, entering?: boolean, leaving?: boolean, open?: boolean}) => ReactNode",
+    "type": "ReactNode | (status: {open?: boolean, closed?: boolean, leaving?: boolean, entering?: boolean, animating?: boolean}) => ReactNode",
     "summary": [
       {
         "kind": "text",
@@ -760,11 +765,12 @@ import { UIApiTable, ClassRenderPropTable, ClassRenderPropPreamble } from "@lynx
     }
   }
 ]}/>
-      
 
-### DialogContent 
-    The main content of the dialog.
-  
+
+### DialogContent
+
+The main content of the dialog.
+
 <UIApiTable source={[
   {
     "name": "children",
@@ -899,8 +905,3 @@ import { UIApiTable, ClassRenderPropTable, ClassRenderPropPreamble } from "@lynx
     "docTypeFallback": null
   }
 ]}/>
-      
-
-
-
-  
