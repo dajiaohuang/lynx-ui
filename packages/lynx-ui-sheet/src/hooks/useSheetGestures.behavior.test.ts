@@ -141,14 +141,18 @@ function makePan(offsets = [450, 900], overrides = {}) {
 
 describe('native scroll coordination', () => {
   function native(
-    options?: { sheetGesture?: object, active?: { current: unknown } },
+    options?: {
+      sheetGesture?: object
+      active?: { current: unknown }
+      resolvedSide?: 'top' | 'bottom' | 'left' | 'right'
+    },
   ) {
     const active = options?.active ?? { current: null }
     const gesture = useSheetNativeScrollGesture(
       {
         sheetGesture: options?.sheetGesture ?? {},
         activeScrollMTRef: active,
-        resolvedSide: 'bottom',
+        resolvedSide: options?.resolvedSide ?? 'bottom',
         position: { current: { get: () => 900 } },
         getResolvedSnapOffsets: () => [450, 900],
       } as unknown as Parameters<typeof useSheetNativeScrollGesture>[0],
@@ -315,6 +319,90 @@ describe('native scroll coordination', () => {
     }, manager)
     expect(manager.consumeGesture).toHaveBeenCalledWith(true)
     expect(manager.fail).toHaveBeenCalled()
+  })
+
+  it('keeps a content-owned vertical pan active while reversing past its origin', () => {
+    const { gesture, motion, options } = makePan()
+    const manager = makeManager()
+    motion.set(900)
+    options.activeScrollMTRef.current.atStart = false
+    gesture.callbacks.begin(event(500, 100), manager)
+    gesture.callbacks.update(event(200, 106), manager)
+    gesture.callbacks.update(event(500, 112), manager)
+    expect(manager.fail).not.toHaveBeenCalled()
+    options.activeScrollMTRef.current.atStart = true
+    gesture.callbacks.update(event(650, 110), manager)
+    expect(motion.get()).toBe(750)
+  })
+
+  it('keeps native boundary updates active while reversing past the touch origin', () => {
+    const { gesture, active } = native()
+    const manager = makeManager()
+    gesture.callbacks.down({
+      params: { pageX: 100, pageY: 500, isAtStart: true },
+    }, manager)
+    gesture.callbacks.update({
+      params: { pageX: 106, pageY: 200, isAtStart: false },
+    }, manager)
+    gesture.callbacks.update({
+      params: { pageX: 112, pageY: 500, isAtStart: false },
+    }, manager)
+    expect(manager.fail).not.toHaveBeenCalled()
+    gesture.callbacks.update({
+      params: { pageX: 110, pageY: 650, isAtStart: true },
+    }, manager)
+    expect(active.current?.atStart).toBe(true)
+  })
+
+  it.each(['top', 'bottom', 'left', 'right'] as const)(
+    'keeps the %s main axis through repeated origin crossings',
+    side => {
+      const active = { current: null }
+      const { gesture: pan, motion } = makePan([450, 900], {
+        side,
+        activeScrollMTRef: active,
+      })
+      motion.set(900)
+      const { gesture: scroll } = native({ active, resolvedSide: side })
+      const panManager = makeManager(), scrollManager = makeManager()
+      const horizontal = side === 'left' || side === 'right'
+      const start = event(500, 100)
+      scroll.callbacks.down({
+        ...start,
+        params: { ...start.params, isAtStart: false },
+      }, scrollManager)
+      pan.callbacks.begin(start, panManager)
+      const coordinates = horizontal
+        ? [event(506, 400), event(512, 100), event(510, -100), event(511, 400)]
+        : [event(200, 106), event(500, 112), event(700, 110), event(200, 111)]
+      for (const point of coordinates) {
+        scroll.callbacks.update({
+          ...point,
+          params: { ...point.params, isAtStart: false },
+        }, scrollManager)
+        pan.callbacks.update(point, panManager)
+      }
+      expect(panManager.fail).not.toHaveBeenCalled()
+      expect(scrollManager.fail).not.toHaveBeenCalled()
+      expect(motion.get()).toBe(900)
+    },
+  )
+
+  it('classifies a new touch independently after a vertical interaction ends', () => {
+    const { gesture } = native()
+    const manager = makeManager()
+    gesture.callbacks.down(
+      down(500, Promise.resolve({ scrollY: 0 }), true),
+      manager,
+    )
+    gesture.callbacks.update(event(200, 5), manager)
+    gesture.callbacks.up(event(200, 5), manager)
+    gesture.callbacks.down(
+      down(500, Promise.resolve({ scrollY: 0 }), true),
+      manager,
+    )
+    gesture.callbacks.update(event(501, 40), manager)
+    expect(manager.fail).toHaveBeenCalledTimes(1)
   })
   it('retains a live native boundary when an older query resolves during the touch', async () => {
     const { gesture, active } = native()

@@ -160,7 +160,9 @@ export function useSheetPanGesture({
       const horizontal = resolvedSide === 'left' || resolvedSide === 'right'
       const dx = Math.abs(event.params.pageX - originMTRef.current.pageX)
       const dy = Math.abs(event.params.pageY - originMTRef.current.pageY)
-      if (!draggingMTRef.current && (horizontal ? dy > dx : dx > dy)) {
+      if (
+        !interactionStartedMTRef.current && (horizontal ? dy > dx : dx > dy)
+      ) {
         manager.fail()
         return
       }
@@ -311,6 +313,7 @@ export function useSheetNativeScrollGesture({
   const nativeGesture = useGesture(NativeGesture)
   const lastCoordinateMTRef = useMainThreadRef(0)
   const scrollOriginMTRef = useMainThreadRef({ pageX: 0, pageY: 0 })
+  const mainAxisStartedMTRef = useMainThreadRef(false)
   const scrollStateMTRef = useMainThreadRef<ActiveSheetScrollGesture | null>(
     null,
   )
@@ -333,6 +336,7 @@ export function useSheetNativeScrollGesture({
       'main thread'
       const params = event.params as NativeScrollParams
       scrollOriginMTRef.current = { pageX: params.pageX, pageY: params.pageY }
+      mainAxisStartedMTRef.current = false
       lastCoordinateMTRef.current = getMainAxisGestureCoordinate(
         resolvedSide,
         params,
@@ -394,7 +398,10 @@ export function useSheetNativeScrollGesture({
       const horizontal = resolvedSide === 'left' || resolvedSide === 'right'
       const dx = Math.abs(params.pageX - scrollOriginMTRef.current.pageX)
       const dy = Math.abs(params.pageY - scrollOriginMTRef.current.pageY)
-      if (!contentDragEnabled || (horizontal ? dy > dx : dx > dy)) {
+      if (
+        !contentDragEnabled
+        || (!mainAxisStartedMTRef.current && (horizontal ? dy > dx : dx > dy))
+      ) {
         if (state.consuming !== true) {
           manager.consumeGesture(true)
           state.consuming = true
@@ -407,6 +414,9 @@ export function useSheetNativeScrollGesture({
       const coordinate = getMainAxisGestureCoordinate(resolvedSide, params)
       const rawDelta = coordinate - lastCoordinateMTRef.current
       lastCoordinateMTRef.current = coordinate
+      // Keep the recognized axis across reversals, including through the origin.
+      // Reclassifying there mistakes small sideways drift for a new child pan.
+      if (rawDelta !== 0) mainAxisStartedMTRef.current = true
       const sheetDelta = getNextMainAxisOffset(resolvedSide, 0, rawDelta)
       const offsets = getResolvedSnapOffsets()
       const maximumPosition = resolveMaximumPosition(offsets)

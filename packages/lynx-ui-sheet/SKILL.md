@@ -23,6 +23,7 @@ Use it when a UI needs a dismissible panel that slides from an edge of the viewp
 - In deeply nested content, call the argument-free `useSheetScrollGesture()` Hook. It returns the same gesture object created by the nearest `SheetNestedScrollContent`; it does not create or configure another gesture.
 - The ownership rule is fixed and directionally natural: upward drags expand the Sheet to its maximum snap before content scrolls; downward drags scroll content to its start before the Sheet collapses. Handoff can occur without lifting the finger.
 - A main-axis content gesture holds an in-progress snap until touch-up or cancellation. If the Sheet takes over the drag, that drag replaces the pending snap. Arrival callbacks run only when the panel reaches its target.
+- Direction recognition belongs to the whole touch: after a main-axis drag starts, reversals across the starting position retain the same recognizers and live scroll boundaries. A new touch can independently select a cross-axis child.
 - To isolate a same-axis native scrolling region, bind its own `NativeGesture`, call `manager.consumeGesture(true)` in its `onBegin` callback, and include it in `SheetNestedScrollContent.gestureRelations.waitFor`. An unbound region still participates in the ancestor pan.
 - Use `gestureConfig` and `gestureRelations` on `SheetNestedScrollContent` only for recognition thresholds and external gesture relationships. Do not replace the Sheet pan or add per-scroll ownership policies.
 
