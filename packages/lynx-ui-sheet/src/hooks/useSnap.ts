@@ -11,14 +11,11 @@ import type { MainThreadRef } from '@lynx-js/react'
 
 import { noop, useMemoizedFn } from '@lynx-js/lynx-ui-common'
 import type { PresenceState } from '@lynx-js/lynx-ui-presence'
-import {
-  animate,
-  useMotionValueRef,
-  useMotionValueRefEvent,
-} from '@lynx-js/motion/mini'
+import { useMotionValueRef, useMotionValueRefEvent } from '@lynx-js/motion/mini'
 import type { MotionValue } from '@lynx-js/motion/mini'
 import type { MainThread } from '@lynx-js/types'
 
+import { useSheetAnimation } from './useSheetAnimation'
 import { useSheetController } from './useSheetController'
 import type { SheetSide, SheetTransition } from '../types'
 import {
@@ -101,6 +98,12 @@ export function useSnap({
   const contentSizeMTRef = useMainThreadRef<number>(0)
   const fitSizeMTRef = useMainThreadRef<number>(0)
   const currentSnapIndex = useMainThreadRef<number>(initialSnap)
+  const {
+    animateToMT,
+    stopAnimationMT,
+    interruptAnimationMT,
+    resumeAnimationMT,
+  } = useSheetAnimation(yRef, snapAnimation)
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const screenHeight: number = userScreenHeight
@@ -200,7 +203,6 @@ export function useSnap({
         : v
       el.setStyleProperties({
         transform: getSheetTransform(resolvedSide, transformValue),
-        transition: 'none',
       })
       if (sheetProgress?.current) {
         const closed = 0
@@ -218,28 +220,6 @@ export function useSnap({
     if (currentSnapIndex.current !== index) {
       currentSnapIndex.current = index
       runOnBackground(onSnapChange)(index, value)
-    }
-  }
-
-  function animateToMT(
-    value: number,
-    cb: () => void = noop,
-    config?: SheetTransition,
-  ) {
-    'main thread'
-    const finalConfig = config ?? snapAnimation
-    if (finalConfig.type === 'spring') {
-      animate(yRef.current, value, {
-        type: 'spring',
-        stiffness: finalConfig.stiffness ?? 200,
-        damping: finalConfig.damping ?? 60,
-        mass: finalConfig.mass ?? 1,
-      }).then(cb)
-    } else {
-      animate(yRef.current, value, {
-        duration: (finalConfig.duration ?? 400) / 1000,
-        ease: finalConfig.ease ?? (t => t),
-      }).then(cb)
     }
   }
 
@@ -279,6 +259,7 @@ export function useSnap({
     {
       yRef,
       animateToMT,
+      stopAnimationMT,
       getTargetForSnap,
       getResolvedSnapPointValues,
       onSnapChangeMT,
@@ -407,6 +388,8 @@ export function useSnap({
     maxSnapSize,
     getClampedValueMT,
     animateToMT,
+    interruptAnimationMT,
+    resumeAnimationMT,
     nearestSnapMT,
     onSnapChangeMT,
     sheetHeightMTRef: sheetSizeMTRef,

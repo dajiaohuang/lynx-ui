@@ -46,6 +46,8 @@ export function SheetNestedScrollContent(props: SheetNestedScrollContentProps) {
     sheetSizeMTRef: snap.sheetSizeMTRef,
     getResolvedSnapOffsets: snap.getResolvedSnapOffsets,
     onSnapChangeMT: snap.onSnapChangeMT,
+    onGestureStartMT: snap.interruptAnimationMT,
+    onGestureEndMT: snap.resumeAnimationMT,
     onDragStartMT: snap.onDragStartMT,
     onDragEndSnapMT: snap.onDragEndSnapMT,
     onDragEndCloseMT: snap.onDragEndCloseMT,
@@ -58,6 +60,7 @@ export function SheetNestedScrollContent(props: SheetNestedScrollContentProps) {
     resolvedSide: context.resolvedSide,
     position: snap.yRef,
     getResolvedSnapOffsets: snap.getResolvedSnapOffsets,
+    onScrollEndMT: snap.resumeAnimationMT,
   })
   const dragEnabled = !context.dragDisabled && (gestureConfig?.enabled ?? true)
   const resolvedChildren = typeof children === 'function'

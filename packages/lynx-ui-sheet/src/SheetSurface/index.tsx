@@ -109,6 +109,7 @@ export function SheetSurface(props: SheetSurfaceProps) {
           overflow: 'hidden',
           transform: 'translate(0px, 0px)',
           ...style,
+          transition: 'none',
         }}
         main-thread:ref={setSheetMTRef}
         implicit-animation='false'
@@ -138,6 +139,7 @@ export function SheetSurface(props: SheetSurfaceProps) {
         overflow: 'hidden',
         transform: 'translate(0px, 0px)',
         ...style,
+        transition: 'none',
       }}
       main-thread:ref={setSheetMTRef}
       implicit-animation='false'

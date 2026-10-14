@@ -57,6 +57,8 @@ interface UseSheetPanGestureOptions {
   sheetSizeMTRef: MainThreadRef<number>
   getResolvedSnapOffsets: () => number[]
   onSnapChangeMT: (index: number, value: number) => void
+  onGestureStartMT?: () => void
+  onGestureEndMT?: () => void
   onDragStartMT: () => void
   onDragEndSnapMT: (
     index: number,
@@ -74,6 +76,7 @@ interface UseSheetNativeScrollGestureOptions {
   resolvedSide: 'top' | 'bottom' | 'left' | 'right'
   position: MainThreadRef<MotionValue<number>>
   getResolvedSnapOffsets: () => number[]
+  onScrollEndMT?: () => void
 }
 
 function getMainAxisGestureCoordinate(
@@ -108,6 +111,8 @@ export function useSheetPanGesture({
   sheetSizeMTRef,
   getResolvedSnapOffsets,
   onSnapChangeMT,
+  onGestureStartMT,
+  onGestureEndMT,
   onDragStartMT,
   onDragEndSnapMT,
   onDragEndCloseMT,
@@ -117,8 +122,17 @@ export function useSheetPanGesture({
   const effectiveRubberBand = rubberBand ?? getDefaultRubberBand(resolvedSide)
   const lastCoordinateMTRef = useMainThreadRef(0)
   const draggingMTRef = useMainThreadRef(false)
+  const interactionStartedMTRef = useMainThreadRef(false)
   const originMTRef = useMainThreadRef({ pageX: 0, pageY: 0 })
   const dragEnabled = !dragDisabled && (gestureConfig?.enabled ?? true)
+
+  function finishInteractionMT() {
+    'main thread'
+    if (!interactionStartedMTRef.current) return
+    interactionStartedMTRef.current = false
+    // Native touch-up owns resumption while the scroll target is still active.
+    if (!activeScrollMTRef.current) onGestureEndMT?.()
+  }
 
   pan
     .enabled(dragEnabled)
@@ -134,6 +148,7 @@ export function useSheetPanGesture({
         event.params,
       )
       draggingMTRef.current = false
+      interactionStartedMTRef.current = false
     })
     .onUpdate((event: PanGestureChangeEvent, manager: StateManager) => {
       'main thread'
@@ -163,6 +178,11 @@ export function useSheetPanGesture({
       // Gesture runtimes may emit stationary updates while a related native
       // gesture is still resolving. A zero delta carries no ownership intent.
       if (delta === 0) return
+      if (!interactionStartedMTRef.current) {
+        interactionStartedMTRef.current = true
+        // Freeze an existing snap before either recognizer owns this drag.
+        onGestureStartMT?.()
+      }
       let maximumPosition: number | undefined
       if (scroll) {
         maximumPosition = resolveMaximumPosition(offsets)
@@ -222,6 +242,7 @@ export function useSheetPanGesture({
     })
     .onEnd(() => {
       'main thread'
+      finishInteractionMT()
       if (!draggingMTRef.current) return
       draggingMTRef.current = false
       const offsets = getResolvedSnapOffsets()
@@ -250,6 +271,8 @@ export function useSheetPanGesture({
       )
       onDragEndSnapMT(nearest.index)
     })
+    .onTouchesUp(finishInteractionMT)
+    .onTouchesCancel(finishInteractionMT)
 
   reconcileSheetGestureRelations(pan, gestureRelations)
   return pan
@@ -283,6 +306,7 @@ export function useSheetNativeScrollGesture({
   resolvedSide,
   position,
   getResolvedSnapOffsets,
+  onScrollEndMT,
 }: UseSheetNativeScrollGestureOptions): NativeGesture {
   const nativeGesture = useGesture(NativeGesture)
   const lastCoordinateMTRef = useMainThreadRef(0)
@@ -405,6 +429,7 @@ export function useSheetNativeScrollGesture({
         activeScrollMTRef.current = null
       }
       scrollStateMTRef.current = null
+      onScrollEndMT?.()
     })
     .onTouchesCancel(() => {
       'main thread'
@@ -412,6 +437,7 @@ export function useSheetNativeScrollGesture({
         activeScrollMTRef.current = null
       }
       scrollStateMTRef.current = null
+      onScrollEndMT?.()
     })
 
   setupSheetScrollGestureRelations(

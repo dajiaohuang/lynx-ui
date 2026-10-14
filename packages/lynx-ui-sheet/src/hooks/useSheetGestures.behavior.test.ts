@@ -126,6 +126,8 @@ function makePan(offsets = [450, 900], overrides = {}) {
     sheetSizeMTRef: { current: 900 },
     getResolvedSnapOffsets: () => offsets,
     onSnapChangeMT: vi.fn(),
+    onGestureStartMT: vi.fn(),
+    onGestureEndMT: vi.fn(),
     onDragStartMT: vi.fn(),
     onDragEndSnapMT: vi.fn(),
     onDragEndCloseMT: vi.fn(),
@@ -197,6 +199,68 @@ describe('native scroll coordination', () => {
     gesture.callbacks.update(event(470), manager)
     expect(scrollManager.consumeGesture.mock.calls).toEqual([[false]])
   })
+
+  it('interrupts settling before native content owns a new main-axis drag', () => {
+    const { gesture, motion, options } = makePan()
+    const manager = makeManager()
+    motion.set(900)
+    options.activeScrollMTRef.current.atStart = false
+    gesture.callbacks.begin(event(100), manager)
+    gesture.callbacks.update(event(120), manager)
+    gesture.callbacks.update(event(140), manager)
+    expect(options.onGestureStartMT).toHaveBeenCalledTimes(1)
+    expect(options.onDragStartMT).not.toHaveBeenCalled()
+    expect(motion.get()).toBe(900)
+    gesture.callbacks.end(event(140), manager)
+    expect(options.onGestureEndMT).not.toHaveBeenCalled()
+  })
+
+  it('does not interrupt a zero-delta or cross-axis gesture', () => {
+    const { gesture, options } = makePan()
+    const manager = makeManager()
+    gesture.callbacks.begin(event(100), manager)
+    gesture.callbacks.update(event(100), manager)
+    gesture.callbacks.update(event(101, 40), manager)
+    expect(options.onGestureStartMT).not.toHaveBeenCalled()
+  })
+
+  it('ends a header interaction only once across pan end and touch-up', () => {
+    const { gesture, options } = makePan([450, 900], {
+      activeScrollMTRef: { current: null },
+    })
+    const manager = makeManager()
+    gesture.callbacks.begin(event(100), manager)
+    gesture.callbacks.update(event(120), manager)
+    gesture.callbacks.end(event(120), manager)
+    gesture.callbacks.up(event(120), manager)
+    expect(options.onGestureEndMT).toHaveBeenCalledTimes(1)
+  })
+
+  it.each(['up', 'cancel'])(
+    'resumes settling when native touch %s clears ownership',
+    phase => {
+      const onScrollEndMT = vi.fn()
+      const active = { current: null }
+      const gesture = useSheetNativeScrollGesture(
+        {
+          sheetGesture: {},
+          activeScrollMTRef: active,
+          resolvedSide: 'bottom',
+          position: { current: { get: () => 900 } },
+          getResolvedSnapOffsets: () => [450, 900],
+          onScrollEndMT,
+        } as unknown as Parameters<typeof useSheetNativeScrollGesture>[0],
+      ) as unknown as InstanceType<typeof runtime.Gesture>
+      const manager = makeManager()
+      gesture.callbacks.down(
+        down(100, Promise.resolve({ scrollY: 80 }), false),
+        manager,
+      )
+      gesture.callbacks[phase](event(100), manager)
+      expect(active.current).toBeNull()
+      expect(onScrollEndMT).toHaveBeenCalledTimes(1)
+    },
+  )
 
   it('queries the boundary only when native fields are absent', async () => {
     const { gesture, active } = native()
