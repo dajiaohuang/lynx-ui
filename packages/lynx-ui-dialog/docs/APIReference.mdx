@@ -1,12 +1,9 @@
 import { UIApiTable, ClassRenderPropTable, ClassRenderPropPreamble } from "@lynx-ui/index";
 
-<!-- cspell:disable -->
-
-
-### DialogRoot
-
-The root component of the Dialog, containing all of its child components.
-
+  
+### DialogRoot 
+    The root component of the Dialog, containing all of its child components.
+  
 <UIApiTable source={[
   {
     "name": "debugLog",
@@ -179,11 +176,11 @@ The root component of the Dialog, containing all of its child components.
     "docTypeFallback": null
   }
 ]}/>
-
+      
 <UIApiTable source={[
   {
     "name": "children",
-    "type": "ReactNode | (status: PresenceAnimationStatus) => ReactNode",
+    "type": "ReactNode | (status: {animating?: boolean, closed?: boolean, entering?: boolean, leaving?: boolean, open?: boolean}) => ReactNode",
     "summary": [
       {
         "kind": "text",
@@ -252,12 +249,11 @@ The root component of the Dialog, containing all of its child components.
     }
   }
 ]}/>
+      
 
-
-### DialogBackdrop
-
-The backdrop mask of the dialog.
-
+### DialogBackdrop 
+    The backdrop mask of the dialog.
+  
 <UIApiTable source={[
   {
     "name": "children",
@@ -500,12 +496,11 @@ The backdrop mask of the dialog.
     "docTypeFallback": null
   }
 ]}/>
+      
 
-
-### DialogView
-
-View container. When 'container' is set correctly, the underlying layer will be replaced with overlay; otherwise, it will be a regular view. When the underlying layer is overlay, the 'level' property can be used to control the hierarchical relationship. For a regular view, use 'z-index' to control the hierarchical relationship. If this dialog needs to be used outside of LynxView, consider enabling overlay.
-
+### DialogView 
+    View container. When 'container' is set correctly, the underlying layer will be replaced with overlay; otherwise, it will be a regular view. When the underlying layer is overlay, the 'level' property can be used to control the hierarchical relationship. For a regular view, use 'z-index' to control the hierarchical relationship. If this dialog needs to be used outside of LynxView, consider enabling overlay.
+  
 <UIApiTable source={[
   {
     "name": "className",
@@ -684,11 +679,11 @@ View container. When 'container' is set correctly, the underlying layer will be 
     "docTypeFallback": null
   }
 ]}/>
-
+      
 <UIApiTable source={[
   {
     "name": "children",
-    "type": "ReactNode | (status: {open?: boolean, closed?: boolean, leaving?: boolean, entering?: boolean, animating?: boolean}) => ReactNode",
+    "type": "ReactNode | (status: {animating?: boolean, closed?: boolean, entering?: boolean, leaving?: boolean, open?: boolean}) => ReactNode",
     "summary": [
       {
         "kind": "text",
@@ -765,12 +760,11 @@ View container. When 'container' is set correctly, the underlying layer will be 
     }
   }
 ]}/>
+      
 
-
-### DialogContent
-
-The main content of the dialog.
-
+### DialogContent 
+    The main content of the dialog.
+  
 <UIApiTable source={[
   {
     "name": "children",
@@ -905,3 +899,8 @@ The main content of the dialog.
     "docTypeFallback": null
   }
 ]}/>
+      
+
+
+
+  

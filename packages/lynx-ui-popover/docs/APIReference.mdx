@@ -1,12 +1,9 @@
 import { UIApiTable, ClassRenderPropTable, ClassRenderPropPreamble } from "@lynx-ui/index";
 
-<!-- cspell:disable -->
-
-
-### PopoverRoot
-
-The root component of the Popover, containing all of its child components.
-
+  
+### PopoverRoot 
+    The root component of the Popover, containing all of its child components.
+  
 <UIApiTable source={[
   {
     "name": "children",
@@ -229,12 +226,11 @@ The root component of the Popover, containing all of its child components.
     "docTypeFallback": null
   }
 ]}/>
+      
 
-
-### PopoverTrigger
-
-The element that triggers the Popover to show.
-
+### PopoverTrigger 
+    The element that triggers the Popover to show.
+  
 <UIApiTable source={[
   {
     "name": "children",
@@ -369,12 +365,11 @@ The element that triggers the Popover to show.
     "docTypeFallback": null
   }
 ]}/>
+      
 
-
-### PopoverPositioner
-
-Helps position the Content and Arrow correctly.
-
+### PopoverPositioner 
+    Helps position the Content and Arrow correctly.
+  
 <UIApiTable source={[
   {
     "name": "autoAdjust",
@@ -553,11 +548,11 @@ Helps position the Content and Arrow correctly.
     "docTypeFallback": null
   }
 ]}/>
-
+      
 <UIApiTable source={[
   {
     "name": "children",
-    "type": "ReactNode | (status: {open?: boolean, closed?: boolean, leaving?: boolean, entering?: boolean, animating?: boolean}) => ReactNode",
+    "type": "ReactNode | (status: {animating?: boolean, closed?: boolean, entering?: boolean, leaving?: boolean, open?: boolean}) => ReactNode",
     "summary": [
       {
         "kind": "text",
@@ -634,12 +629,11 @@ Helps position the Content and Arrow correctly.
     }
   }
 ]}/>
+      
 
-
-### PopoverContent
-
-The content of the Popover.
-
+### PopoverContent 
+    The content of the Popover.
+  
 <UIApiTable source={[
   {
     "name": "children",
@@ -752,12 +746,11 @@ The content of the Popover.
     "docTypeFallback": null
   }
 ]}/>
+      
 
-
-### PopoverArrow
-
-The arrow of the Popover.
-
+### PopoverArrow 
+    The arrow of the Popover.
+  
 <UIApiTable source={[
   {
     "name": "children",
@@ -849,7 +842,7 @@ The arrow of the Popover.
   },
   {
     "name": "size",
-    "type": "number | {height: number, width: number}",
+    "type": "number | [object Object]",
     "summary": [
       {
         "kind": "text",
@@ -962,3 +955,10 @@ The arrow of the Popover.
     "docTypeFallback": null
   }
 ]}/>
+      
+
+
+
+
+
+  

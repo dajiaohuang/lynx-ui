@@ -1,13 +1,32 @@
-import { UIApiTable, ClassRenderPropTable, ClassRenderPropPreamble } from "@lynx-ui/index";
+import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
 
-<!-- cspell:disable -->
-
-
-### RadioGroupRoot
-
-The root component of the RadioGroup, containing all of its child components.
-
+  
+### RadioGroupRoot 
+    The root component of the RadioGroup, containing all of its child components.
+  
 <UIApiTable source={[
+  {
+    "name": "children",
+    "type": "ReactNode | [object Object]",
+    "summary": [
+      {
+        "kind": "text",
+        "text": "children"
+      }
+    ],
+    "summary_zh": [
+      {
+        "kind": "text",
+        "text": "子节点"
+      }
+    ],
+    "defaultValue": "",
+    "isOption": true,
+    "isSupportIOS": true,
+    "isSupportAndroid": true,
+    "isSupportHarmony": true,
+    "docTypeFallback": null
+  },
   {
     "name": "defaultValue",
     "type": "string",
@@ -97,58 +116,11 @@ The root component of the RadioGroup, containing all of its child components.
     "docTypeFallback": null
   }
 ]}/>
+      
 
-<UIApiTable source={[
-  {
-    "name": "children",
-    "type": "ReactNode | (state: RadioGroupRenderProps) => ReactNode",
-    "summary": [
-      {
-        "kind": "text",
-        "text": "children"
-      }
-    ],
-    "summary_zh": [
-      {
-        "kind": "text",
-        "text": "子节点"
-      }
-    ],
-    "defaultValue": "",
-    "isOption": true,
-    "isSupportIOS": true,
-    "isSupportAndroid": true,
-    "isSupportHarmony": true,
-    "docTypeFallback": null
-  }
-]}/>
-<ClassRenderPropPreamble />
-<ClassRenderPropTable source={[
-  {
-    "className": "ui-disabled",
-    "Render Prop": "disabled",
-    "item": {
-      "type": "boolean",
-      "description": "Whether the RadioGroup is disabled.\nApplied when `status.disabled` is true.",
-      "description_zh": "RadioGroup 是否整体被禁用。"
-    }
-  },
-  {
-    "className": "ui-value",
-    "Render Prop": "value",
-    "item": {
-      "type": "string | unknown",
-      "description": "The current selected value of the RadioGroup.\nApplied when `status.value` is true.",
-      "description_zh": "RadioGroup 当前被选中的值。"
-    }
-  }
-]}/>
-
-
-### Radio
-
-The item inside RadioGroup.
-
+### Radio 
+    The item inside RadioGroup.
+  
 <UIApiTable source={[
   {
     "name": "children",
@@ -283,13 +255,11 @@ The item inside RadioGroup.
     "docTypeFallback": null
   }
 ]}/>
+      
 
-
-
-### RadioIndicator
-
-The check slot indicating this Radio is now selected. Normally a circle. It's children will only be rendered when selected so it can be a custom inner selected indicator. Can be a ReactNode or a render function returns a ReactNode.
-
+### RadioIndicator 
+    The check slot indicating this Radio is now selected. Normally a circle. It's children will only be rendered when selected so it can be a custom inner selected indicator. Can be a ReactNode or a render function returns a ReactNode.
+  
 <UIApiTable source={[
   {
     "name": "children",
@@ -380,3 +350,6 @@ The check slot indicating this Radio is now selected. Normally a circle. It's ch
     "docTypeFallback": null
   }
 ]}/>
+      
+
+  

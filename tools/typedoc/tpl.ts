@@ -660,8 +660,6 @@ const doGenTplWithData = async (
   // render-prop table don't ship an unused import.
   const mdxHeader =
     `import { UIApiTable, ClassRenderPropTable, ClassRenderPropPreamble } from "@lynx-ui/index";
-
-<!-- cspell:disable -->
 `
 
   if (multipleProps) {

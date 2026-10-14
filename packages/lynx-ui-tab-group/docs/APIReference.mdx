@@ -1348,7 +1348,7 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
   },
   {
     "name": "onContentSizeChange",
-    "type": "(res: {detail: {scrollHeight: number, scrollWidth: number}}) => void",
+    "type": "(res: Record<string, unknown>) => void",
     "summary": [
       {
         "kind": "text",
@@ -1812,7 +1812,7 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
   },
   {
     "name": "animation",
-    "type": "{actions: Record<string, unknown>[]}",
+    "type": "Record<string, unknown>",
     "summary": [
       {
         "kind": "text",
@@ -4412,7 +4412,7 @@ import { UIApiTable, ClassRenderPropTable } from "@lynx-ui/index";
   },
   {
     "name": "hit-slop",
-    "type": "px | {bottom: px, left: px, right: px, top: px}",
+    "type": "px | Record<string, unknown>",
     "summary": [
       {
         "kind": "text",
