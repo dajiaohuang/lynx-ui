@@ -72,6 +72,7 @@ interface UseSheetPanGestureOptions {
 interface UseSheetNativeScrollGestureOptions {
   sheetGesture: GestureKind
   contentDragEnabled?: boolean
+  minDistance?: number
   activeScrollMTRef: MainThreadRef<ActiveSheetScrollGesture | null>
   resolvedSide: 'top' | 'bottom' | 'left' | 'right'
   position: MainThreadRef<MotionValue<number>>
@@ -304,6 +305,7 @@ function getDefaultScrollStartBoundary(
 export function useSheetNativeScrollGesture({
   sheetGesture,
   contentDragEnabled = true,
+  minDistance = 3,
   activeScrollMTRef,
   resolvedSide,
   position,
@@ -398,6 +400,14 @@ export function useSheetNativeScrollGesture({
       const horizontal = resolvedSide === 'left' || resolvedSide === 'right'
       const dx = Math.abs(params.pageX - scrollOriginMTRef.current.pageX)
       const dy = Math.abs(params.pageY - scrollOriginMTRef.current.pageY)
+      // NativeGesture emits updates before the related PanGesture activates.
+      // Keep boundary observations alive through the same recognition distance.
+      if (
+        contentDragEnabled && !mainAxisStartedMTRef.current
+        && dx <= minDistance && dy <= minDistance
+      ) {
+        return
+      }
       if (
         !contentDragEnabled
         || (!mainAxisStartedMTRef.current && (horizontal ? dy > dx : dx > dy))

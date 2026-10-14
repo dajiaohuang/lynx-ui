@@ -145,6 +145,7 @@ describe('native scroll coordination', () => {
       sheetGesture?: object
       active?: { current: unknown }
       resolvedSide?: 'top' | 'bottom' | 'left' | 'right'
+      minDistance?: number
     },
   ) {
     const active = options?.active ?? { current: null }
@@ -153,6 +154,7 @@ describe('native scroll coordination', () => {
         sheetGesture: options?.sheetGesture ?? {},
         activeScrollMTRef: active,
         resolvedSide: options?.resolvedSide ?? 'bottom',
+        minDistance: options?.minDistance,
         position: { current: { get: () => 900 } },
         getResolvedSnapOffsets: () => [450, 900],
       } as unknown as Parameters<typeof useSheetNativeScrollGesture>[0],
@@ -353,6 +355,62 @@ describe('native scroll coordination', () => {
     }, manager)
     expect(active.current?.atStart).toBe(true)
   })
+
+  it('waits for meaningful displacement before classifying native touch jitter', () => {
+    const { gesture, active } = native()
+    const manager = makeManager()
+    gesture.callbacks.down({
+      params: { pageX: 100, pageY: 500, isAtStart: true },
+    }, manager)
+    gesture.callbacks.update({
+      params: { pageX: 102, pageY: 501, isAtStart: true },
+    }, manager)
+    expect(manager.fail).not.toHaveBeenCalled()
+    gesture.callbacks.update({
+      params: { pageX: 102, pageY: 450, isAtStart: false },
+    }, manager)
+    expect(active.current?.atStart).toBe(false)
+    gesture.callbacks.update({
+      params: { pageX: 103, pageY: 520, isAtStart: true },
+    }, manager)
+    expect(active.current?.atStart).toBe(true)
+    expect(manager.fail).not.toHaveBeenCalled()
+  })
+
+  it.each([0, 3, 12])(
+    'uses the configured %s pixel recognition distance for the native coordinator',
+    minDistance => {
+      const { gesture } = native({ minDistance })
+      const manager = makeManager()
+      gesture.callbacks.down({
+        params: { pageX: 100, pageY: 500, isAtStart: true },
+      }, manager)
+      gesture.callbacks.update({
+        params: {
+          pageX: 100 + minDistance,
+          pageY: 500 + minDistance / 2,
+          isAtStart: true,
+        },
+      }, manager)
+      expect(manager.fail).not.toHaveBeenCalled()
+      gesture.callbacks.update({
+        params: {
+          pageX: 100 + minDistance,
+          pageY: 450 - minDistance,
+          isAtStart: false,
+        },
+      }, manager)
+      expect(manager.fail).not.toHaveBeenCalled()
+      gesture.callbacks.up(event(450 - minDistance), manager)
+      gesture.callbacks.down({
+        params: { pageX: 100, pageY: 500, isAtStart: true },
+      }, manager)
+      gesture.callbacks.update({
+        params: { pageX: 101 + minDistance, pageY: 500, isAtStart: true },
+      }, manager)
+      expect(manager.fail).toHaveBeenCalledTimes(1)
+    },
+  )
 
   it.each(['top', 'bottom', 'left', 'right'] as const)(
     'keeps the %s main axis through repeated origin crossings',

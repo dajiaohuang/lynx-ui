@@ -54,6 +54,7 @@ export function SheetNestedScrollContent(props: SheetNestedScrollContentProps) {
   })
   const scrollGesture = useSheetNativeScrollGesture({
     sheetGesture,
+    minDistance: gestureConfig?.minDistance,
     contentDragEnabled: !context.handleOnly && !context.dragDisabled
       && (gestureConfig?.enabled ?? true),
     activeScrollMTRef,
