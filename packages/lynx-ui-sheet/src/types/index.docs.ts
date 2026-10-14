@@ -144,6 +144,25 @@ export type SheetGestureConfig = Pick<
   'enabled' | 'minDistance'
 >
 
+/**
+ * An optional action region pinned to the visible bottom sheet boundary.
+ * Place one SheetFooter directly inside SheetContent or SheetNestedScrollContent,
+ * outside any scrolling node. Supports side="bottom" only. Its intrinsic height
+ * contributes to 'fit' snap points; numeric and percentage snaps stay unchanged.
+ * Do not include the footer height again in the body's intrinsic 'fit' height.
+ * Position, transform, and transition are managed by the Sheet.
+ */
+export interface SheetFooterProps extends ComponentBasicProps {
+  /** Footer content. */
+  children?: ReactNode
+  /**
+   * Reports the measured height on layout changes and zero on unmount, not animation frames.
+   * Use it to reserve bottom padding in a custom scroll container. SheetFooter
+   * does not modify scroll padding or automatically handle keyboard/safe-area insets.
+   */
+  onHeightChange?: (height: number) => void
+}
+
 export interface SheetGestureRelations {
   simultaneousWith?: GestureKind[]
   /**

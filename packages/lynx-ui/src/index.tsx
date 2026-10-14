@@ -286,6 +286,7 @@ export {
   SheetNestedScrollContent,
   SheetBackdrop,
   SheetHandle,
+  SheetFooter,
   SheetView,
   useSnap,
   useSheetScrollGesture,
@@ -302,6 +303,7 @@ export type {
   SheetSide,
   SheetViewProps,
   SheetHandleProps,
+  SheetFooterProps,
   SheetTransition,
 } from '@lynx-js/lynx-ui-sheet'
 

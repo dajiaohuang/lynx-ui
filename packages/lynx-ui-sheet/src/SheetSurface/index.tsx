@@ -5,8 +5,8 @@
 import type { GestureKind } from '@lynx-js/gesture-runtime'
 import type { MainThread } from '@lynx-js/types'
 
-import { SheetDragContext } from '../context'
-import type { SheetDragContextValue } from '../context'
+import { SheetDragContext, SheetFooterContext } from '../context'
+import type { SheetDragContextValue, SheetFooterContextValue } from '../context'
 import type { SheetContentProps } from '../types'
 
 export interface SheetSurfaceProps extends SheetContentProps {
@@ -16,6 +16,7 @@ export interface SheetSurfaceProps extends SheetContentProps {
   handleOnly?: boolean
   snapPoints: Array<number | string>
   maxSnapSize: number
+  footerContext: SheetFooterContextValue
   setSheetMTRef: (element: MainThread.Element) => void
   setContentMTRef: (element: MainThread.Element) => void
   handleSheetLayoutChangeMT: (event: {
@@ -40,6 +41,7 @@ export function SheetSurface(props: SheetSurfaceProps) {
     handleOnly,
     snapPoints,
     maxSnapSize,
+    footerContext,
     setSheetMTRef,
     setContentMTRef,
     handleSheetLayoutChangeMT,
@@ -65,6 +67,7 @@ export function SheetSurface(props: SheetSurfaceProps) {
         }
         : {
           width: '100%',
+          position: 'relative',
           ...innerStyle,
           ...(hasFitSnapPoint ? {} : { height: `${maxSnapSize}px` }),
         }}
@@ -89,7 +92,11 @@ export function SheetSurface(props: SheetSurfaceProps) {
           dragHandlers: sheetGesture && !handleOnly ? {} : dragHandlers,
         }}
       >
-        {children}
+        <SheetFooterContext.Provider
+          value={footerContext}
+        >
+          {children}
+        </SheetFooterContext.Provider>
       </SheetDragContext.Provider>
     </view>
   )

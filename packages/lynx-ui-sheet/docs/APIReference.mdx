@@ -1977,6 +1977,97 @@ Requires enableNewGesture: true and LynxSDK 3.2 or newer.
 ]}/>
 
 
+### SheetFooter
+
+An optional action region pinned to the visible bottom sheet boundary.
+Place one SheetFooter directly inside SheetContent or SheetNestedScrollContent,
+outside any scrolling node. Supports side="bottom" only. Its intrinsic height
+contributes to 'fit' snap points; numeric and percentage snaps stay unchanged.
+Do not include the footer height again in the body's intrinsic 'fit' height.
+Position, transform, and transition are managed by the Sheet.
+
+<UIApiTable source={[
+  {
+    "name": "children",
+    "type": "ReactNode",
+    "summary": [
+      {
+        "kind": "text",
+        "text": "Footer content."
+      }
+    ],
+    "summary_zh": [],
+    "defaultValue": "",
+    "isOption": true,
+    "isSupportIOS": false,
+    "isSupportAndroid": false,
+    "isSupportHarmony": false,
+    "docTypeFallback": null
+  },
+  {
+    "name": "className",
+    "type": "string",
+    "summary": [
+      {
+        "kind": "text",
+        "text": "className"
+      }
+    ],
+    "summary_zh": [
+      {
+        "kind": "text",
+        "text": "类名"
+      }
+    ],
+    "defaultValue": "",
+    "isOption": true,
+    "isSupportIOS": true,
+    "isSupportAndroid": true,
+    "isSupportHarmony": true,
+    "docTypeFallback": null
+  },
+  {
+    "name": "onHeightChange",
+    "type": "(height: number) => void",
+    "summary": [
+      {
+        "kind": "text",
+        "text": "Reports the measured height on layout changes and zero on unmount, not animation frames.\nUse it to reserve bottom padding in a custom scroll container. SheetFooter\ndoes not modify scroll padding or automatically handle keyboard/safe-area insets."
+      }
+    ],
+    "summary_zh": [],
+    "defaultValue": "",
+    "isOption": true,
+    "isSupportIOS": false,
+    "isSupportAndroid": false,
+    "isSupportHarmony": false,
+    "docTypeFallback": null
+  },
+  {
+    "name": "style",
+    "type": "CSSProperties",
+    "summary": [
+      {
+        "kind": "text",
+        "text": "style"
+      }
+    ],
+    "summary_zh": [
+      {
+        "kind": "text",
+        "text": "样式"
+      }
+    ],
+    "defaultValue": "",
+    "isOption": true,
+    "isSupportIOS": true,
+    "isSupportAndroid": true,
+    "isSupportHarmony": true,
+    "docTypeFallback": null
+  }
+]}/>
+
+
 
 
 

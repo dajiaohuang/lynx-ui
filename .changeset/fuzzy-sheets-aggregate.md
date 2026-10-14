@@ -2,4 +2,4 @@
 "@lynx-js/lynx-ui": minor
 ---
 
-Export `SheetNestedScrollContent` and the nested scroll hook.
+Export `SheetNestedScrollContent`, `SheetFooter`, and the nested scroll hook.

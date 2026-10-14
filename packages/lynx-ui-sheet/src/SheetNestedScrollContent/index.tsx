@@ -84,6 +84,7 @@ export function SheetNestedScrollContent(props: SheetNestedScrollContentProps) {
         handleOnly={context.handleOnly}
         snapPoints={snapPoints}
         maxSnapSize={snap.maxSnapSize}
+        footerContext={snap.footerContext}
         setSheetMTRef={snap.setSheetMTRef}
         setContentMTRef={snap.setContentMTRef}
         handleSheetLayoutChangeMT={snap.handleSheetLayoutChangeMT}

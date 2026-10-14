@@ -12,3 +12,5 @@ Preserve the recognized drag axis through same-touch reversals so sideways drift
 near the starting point does not interrupt boundary tracking or handoff.
 Use the same recognition distance for native scroll coordination and the Sheet
 pan so small initial movements do not prematurely stop boundary tracking.
+Add an optional `SheetFooter` that measures its height and follows bottom-sheet
+position through snapping and dismissal, with explicit custom scroll clearance.

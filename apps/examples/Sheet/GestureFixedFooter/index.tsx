@@ -2,10 +2,11 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-import { root, useRef } from '@lynx-js/react'
+import { root, useRef, useState } from '@lynx-js/react'
 
 import {
   SheetBackdrop,
+  SheetFooter,
   SheetHandle,
   SheetNestedScrollContent,
   SheetRoot,
@@ -22,12 +23,13 @@ const paymentMethods = Array.from(
   (_, index) => `Payment method ${index + 1}`,
 )
 
-function PaymentMethodList() {
+function PaymentMethodList({ footerHeight }: { footerHeight: number }) {
   const gesture = useSheetScrollGesture()
 
   return (
     <scroll-view
       className='payment-methods'
+      style={{ paddingBottom: footerHeight }}
       scroll-orientation='vertical'
       bounces={false}
       main-thread:gesture={gesture}
@@ -47,12 +49,13 @@ function PaymentMethodList() {
 
 function App() {
   const sheetRef = useRef<SheetRootRef>(null)
+  const [footerHeight, setFooterHeight] = useState(0)
 
   return (
     <view className='demo-container lunaris-dark'>
       <text className='title-text'>Gesture Sheet + Fixed Footer</text>
       <text className='subtitle-text'>
-        Scrollable content and fixed actions are sibling layout regions.
+        Fixed actions follow the sheet through snapping and dismissal.
       </text>
       <TriggerButton
         onClick={() => sheetRef.current?.open()}
@@ -73,14 +76,17 @@ function App() {
                 Only this middle region scrolls.
               </text>
             </view>
-            <PaymentMethodList />
+            <PaymentMethodList footerHeight={footerHeight} />
+            <SheetFooter
+              className='fixed-actions'
+              onHeightChange={setFooterHeight}
+            >
+              <ActionButton
+                onClick={() => sheetRef.current?.close()}
+                text='Continue'
+              />
+            </SheetFooter>
           </SheetNestedScrollContent>
-          <view className='fixed-actions'>
-            <ActionButton
-              onClick={() => sheetRef.current?.close()}
-              text='Continue'
-            />
-          </view>
         </SheetView>
       </SheetRoot>
     </view>

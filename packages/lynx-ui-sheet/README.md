@@ -46,6 +46,7 @@ The `Sheet` component is composed of several specialized sub-components to give 
 - **`SheetContent`**: The actual sliding panel that contains your content.
 - **`SheetNestedScrollContent`**: A replacement for `SheetContent` that coordinates
   sheet dragging with nested native scrolling.
+- **`SheetFooter`**: An optional measured action region pinned to the visible bottom sheet.
 - **`SheetHandle`**: (Optional) A draggable visual indicator (usually a small bar) at the top of the sheet content.
 
 ## Nested scrolling

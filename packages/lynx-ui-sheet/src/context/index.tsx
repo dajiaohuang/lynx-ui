@@ -67,6 +67,26 @@ export interface SheetContextValue {
   presenceStateMTRef?: MainThreadRef<PresenceState>
 }
 
+export interface SheetFooterContextValue {
+  resolvedSide: SheetResolvedSide
+  registerFooter: (id: string, height: number) => void
+  unregisterFooter: (id: string) => void
+}
+
+export const SheetFooterContext = createContext<SheetFooterContextValue | null>(
+  null,
+)
+
+export function useSheetFooterContext() {
+  const context = useContext(SheetFooterContext)
+  if (!context || context.resolvedSide !== 'bottom') {
+    throw new Error(
+      'SheetFooter requires bottom SheetContent or SheetNestedScrollContent',
+    )
+  }
+  return context
+}
+
 export interface SheetDragContextValue {
   dragHandlers: {
     handleTouchStartMT?: (e: MainThread.TouchEvent) => void
