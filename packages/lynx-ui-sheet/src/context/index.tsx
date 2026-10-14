@@ -78,6 +78,8 @@ export interface SheetDragContextValue {
 
 export interface ActiveSheetScrollGesture {
   manager: StateManager | null
+  consuming?: boolean
+  revision?: number
   atStart?: boolean
 }
 

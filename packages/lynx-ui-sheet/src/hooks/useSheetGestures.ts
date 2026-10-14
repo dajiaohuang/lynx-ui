@@ -31,6 +31,7 @@ import {
 } from '../utils'
 import {
   parseScrollInfoAtStart,
+  reconcileSheetGestureRelations,
   setupSheetScrollGestureRelations,
 } from './gestureRelations'
 import { resolveNestedScrollOwner } from './nestedScroll'
@@ -55,6 +56,7 @@ interface UseSheetPanGestureOptions {
   viewportSize: number
   sheetSizeMTRef: MainThreadRef<number>
   getResolvedSnapOffsets: () => number[]
+  onSnapChangeMT: (index: number, value: number) => void
   onDragStartMT: () => void
   onDragEndSnapMT: (
     index: number,
@@ -67,6 +69,7 @@ interface UseSheetPanGestureOptions {
 
 interface UseSheetNativeScrollGestureOptions {
   sheetGesture: GestureKind
+  contentDragEnabled?: boolean
   activeScrollMTRef: MainThreadRef<ActiveSheetScrollGesture | null>
   resolvedSide: 'top' | 'bottom' | 'left' | 'right'
   position: MainThreadRef<MotionValue<number>>
@@ -104,6 +107,7 @@ export function useSheetPanGesture({
   viewportSize,
   sheetSizeMTRef,
   getResolvedSnapOffsets,
+  onSnapChangeMT,
   onDragStartMT,
   onDragEndSnapMT,
   onDragEndCloseMT,
@@ -113,16 +117,18 @@ export function useSheetPanGesture({
   const effectiveRubberBand = rubberBand ?? getDefaultRubberBand(resolvedSide)
   const lastCoordinateMTRef = useMainThreadRef(0)
   const draggingMTRef = useMainThreadRef(false)
+  const originMTRef = useMainThreadRef({ pageX: 0, pageY: 0 })
+  const dragEnabled = !dragDisabled && (gestureConfig?.enabled ?? true)
 
   pan
-    .enabled(!dragDisabled && (gestureConfig?.enabled ?? true))
+    .enabled(dragEnabled)
     .minDistance(gestureConfig?.minDistance ?? 3)
-    .updateConfig('activeOffsetX', gestureConfig?.activeOffsetX)
-    .updateConfig('activeOffsetY', gestureConfig?.activeOffsetY)
-    .updateConfig('failOffsetX', gestureConfig?.failOffsetX)
-    .updateConfig('failOffsetY', gestureConfig?.failOffsetY)
     .onBegin(event => {
       'main thread'
+      originMTRef.current = {
+        pageX: event.params.pageX,
+        pageY: event.params.pageY,
+      }
       lastCoordinateMTRef.current = getMainAxisGestureCoordinate(
         resolvedSide,
         event.params,
@@ -131,6 +137,18 @@ export function useSheetPanGesture({
     })
     .onUpdate((event: PanGestureChangeEvent, manager: StateManager) => {
       'main thread'
+      if (!dragEnabled) {
+        draggingMTRef.current = false
+        manager.fail()
+        return
+      }
+      const horizontal = resolvedSide === 'left' || resolvedSide === 'right'
+      const dx = Math.abs(event.params.pageX - originMTRef.current.pageX)
+      const dy = Math.abs(event.params.pageY - originMTRef.current.pageY)
+      if (!draggingMTRef.current && (horizontal ? dy > dx : dx > dy)) {
+        manager.fail()
+        return
+      }
       const coordinate = getMainAxisGestureCoordinate(
         resolvedSide,
         event.params,
@@ -155,13 +173,24 @@ export function useSheetPanGesture({
           contentAtStart: scroll.atStart,
         })
         if (owner === 'content') {
-          // Once content takes over, do not snap the Sheet from stale velocity.
+          // Both recognizers stay active so reversals retain live boundaries.
+          // Report the reached snap without starting a release animation.
+          if (draggingMTRef.current && current === maximumPosition) {
+            onSnapChangeMT(offsets.indexOf(maximumPosition), maximumPosition)
+          }
           draggingMTRef.current = false
-          scroll.manager?.consumeGesture(true)
-          manager.fail()
+          if (scroll.consuming !== true) {
+            scroll.manager?.consumeGesture(true)
+            scroll.consuming = true
+            activeScrollMTRef.current = scroll
+          }
           return
         }
-        scroll.manager?.consumeGesture(false)
+        if (scroll.consuming !== false) {
+          scroll.manager?.consumeGesture(false)
+          scroll.consuming = false
+          activeScrollMTRef.current = scroll
+        }
       }
 
       if (!draggingMTRef.current) {
@@ -222,21 +251,7 @@ export function useSheetPanGesture({
       onDragEndSnapMT(nearest.index)
     })
 
-  for (const gesture of gestureRelations?.simultaneousWith ?? []) {
-    if (!(pan.simultaneousWith as GestureKind[]).includes(gesture)) {
-      pan.externalSimultaneous(gesture)
-    }
-  }
-  for (const gesture of gestureRelations?.waitFor ?? []) {
-    if (!(pan.waitFor as GestureKind[]).includes(gesture)) {
-      pan.externalWaitFor(gesture)
-    }
-  }
-  for (const gesture of gestureRelations?.continueWith ?? []) {
-    if (!(pan.continueWith as GestureKind[]).includes(gesture)) {
-      pan.externalContinueWith(gesture)
-    }
-  }
+  reconcileSheetGestureRelations(pan, gestureRelations)
   return pan
 }
 
@@ -263,14 +278,15 @@ function getDefaultScrollStartBoundary(
 /** Create the NativeGesture shared by SheetGestureContent descendants. */
 export function useSheetNativeScrollGesture({
   sheetGesture,
+  contentDragEnabled = true,
   activeScrollMTRef,
   resolvedSide,
   position,
   getResolvedSnapOffsets,
 }: UseSheetNativeScrollGestureOptions): NativeGesture {
   const nativeGesture = useGesture(NativeGesture)
-  const scrollBoundaryMTRef = useMainThreadRef<{ atStart?: boolean }>({})
   const lastCoordinateMTRef = useMainThreadRef(0)
+  const scrollOriginMTRef = useMainThreadRef({ pageX: 0, pageY: 0 })
   const scrollStateMTRef = useMainThreadRef<ActiveSheetScrollGesture | null>(
     null,
   )
@@ -279,30 +295,39 @@ export function useSheetNativeScrollGesture({
     .enabled(true)
     .onBegin((_, manager) => {
       'main thread'
-      manager.consumeGesture(true)
+      const state = scrollStateMTRef.current
+      if (state?.consuming !== true) {
+        manager.consumeGesture(true)
+        if (state) {
+          state.consuming = true
+          scrollStateMTRef.current = state
+          activeScrollMTRef.current = state
+        }
+      }
     })
     .onTouchesDown((event, manager) => {
       'main thread'
       const params = event.params as NativeScrollParams
+      scrollOriginMTRef.current = { pageX: params.pageX, pageY: params.pageY }
       lastCoordinateMTRef.current = getMainAxisGestureCoordinate(
         resolvedSide,
         params,
       )
-      // Use native gesture params when available, otherwise retain the last
-      // boundary sampled by this native scroll integration.
+      // Prefer native boundary fields to asynchronous scroll-position queries.
       const boundaryFromParams = getDefaultScrollStartBoundary(
         resolvedSide,
         params,
       )
-      const capturedState = {
+      const capturedState: ActiveSheetScrollGesture = {
         manager,
-        atStart: boundaryFromParams ?? scrollBoundaryMTRef.current.atStart,
+        atStart: boundaryFromParams,
+        revision: 0,
       }
       scrollStateMTRef.current = capturedState
       activeScrollMTRef.current = capturedState
-      // Async cold seed: query actual scroll position to confirm boundary.
-      // Updates persistent ref always; updates active state only if still
-      // the same touch (guards against stale promises from prior touches).
+      // A cold query is only needed when the native event has no boundary.
+      // Never let it overwrite a newer observation or another touch/target.
+      if (boundaryFromParams !== undefined) return
       void (event.currentTarget as {
         invoke: (m: string) => Promise<{ scrollX?: number, scrollY?: number }>
       })
@@ -311,10 +336,14 @@ export function useSheetNativeScrollGesture({
           'main thread'
           const atStart = parseScrollInfoAtStart(resolvedSide, info)
           if (atStart === undefined) return
-          scrollBoundaryMTRef.current.atStart = atStart
-          // Only update active state if this promise belongs to current touch
-          if (activeScrollMTRef.current === capturedState) {
+          if (
+            scrollStateMTRef.current === capturedState
+            && activeScrollMTRef.current === capturedState
+            && capturedState.revision === 0
+          ) {
             capturedState.atStart = atStart
+            scrollStateMTRef.current = capturedState
+            activeScrollMTRef.current = capturedState
           }
         })
         .catch(() => {
@@ -334,6 +363,22 @@ export function useSheetNativeScrollGesture({
       )
       if (boundaryFromParams !== undefined) {
         state.atStart = boundaryFromParams
+        state.revision = (state.revision ?? 0) + 1
+        scrollStateMTRef.current = state
+        activeScrollMTRef.current = state
+      }
+      const horizontal = resolvedSide === 'left' || resolvedSide === 'right'
+      const dx = Math.abs(params.pageX - scrollOriginMTRef.current.pageX)
+      const dy = Math.abs(params.pageY - scrollOriginMTRef.current.pageY)
+      if (!contentDragEnabled || (horizontal ? dy > dx : dx > dy)) {
+        if (state.consuming !== true) {
+          manager.consumeGesture(true)
+          state.consuming = true
+          scrollStateMTRef.current = state
+          activeScrollMTRef.current = state
+        }
+        if (contentDragEnabled) manager.fail()
+        return
       }
       const coordinate = getMainAxisGestureCoordinate(resolvedSide, params)
       const rawDelta = coordinate - lastCoordinateMTRef.current
@@ -347,9 +392,11 @@ export function useSheetNativeScrollGesture({
         maximumPosition,
         contentAtStart: state.atStart,
       })
-      if (owner === 'sheet') {
+      if (owner === 'sheet' && state.consuming !== false) {
         manager.consumeGesture(false)
-        manager.fail()
+        state.consuming = false
+        scrollStateMTRef.current = state
+        activeScrollMTRef.current = state
       }
     })
     .onTouchesUp(() => {
@@ -367,7 +414,10 @@ export function useSheetNativeScrollGesture({
       scrollStateMTRef.current = null
     })
 
-  setupSheetScrollGestureRelations(nativeGesture, sheetGesture)
+  setupSheetScrollGestureRelations(
+    nativeGesture,
+    contentDragEnabled ? sheetGesture : undefined,
+  )
   return nativeGesture
 }
 

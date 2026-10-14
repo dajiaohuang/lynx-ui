@@ -50,6 +50,8 @@ The `Sheet` component is composed of several specialized sub-components to give 
 
 ## Nested scrolling
 
+Enable `enableNewGesture: true` in the Rspeedy config and use LynxSDK 3.2 or newer.
+
 Replace only the content layer with `SheetGestureContent`, then bind its
 coordinated gesture to the outermost vertical native scrolling node. The render
 prop is the most explicit path:
@@ -85,8 +87,9 @@ it to the outermost vertical scrolling node. The built-in ownership rule matches
 common bottom-sheet behavior: an upward drag expands the Sheet to its maximum
 snap before content scrolls, while a downward drag scrolls content back to its
 start before the Sheet collapses. Both transfers can occur without lifting the
-finger. A region that should scroll independently simply does not bind this
-gesture.
+finger. For an independent region on the same axis, bind a separate consuming `NativeGesture`
+and include it in `gestureRelations.waitFor`. Leaving it unbound does not
+isolate it from the ancestor Sheet pan.
 
 `gestureConfig` and `gestureRelations` remain available on
 `SheetGestureContent` for recognition thresholds and relationships with external

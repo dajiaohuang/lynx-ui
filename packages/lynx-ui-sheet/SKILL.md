@@ -17,11 +17,12 @@ Use it when a UI needs a dismissible panel that slides from an edge of the viewp
 
 ## Nested Scroll Rules
 
+- Enable `enableNewGesture: true` and use LynxSDK 3.2 or newer.
 - Use `SheetGestureContent` for nested native scrolling with `scroll-view` or `list`.
 - Prefer its render prop for a nearby scroll node: bind `scrollGesture` to the outermost vertical scrolling node with `main-thread:gesture`.
 - In deeply nested content, call the argument-free `useSheetScrollGesture()` Hook. It returns the same gesture object created by the nearest `SheetGestureContent`; it does not create or configure another gesture.
 - The ownership rule is fixed and directionally natural: upward drags expand the Sheet to its maximum snap before content scrolls; downward drags scroll content to its start before the Sheet collapses. Handoff can occur without lifting the finger.
-- To keep a native scrolling region independent of the Sheet, do not bind the shared gesture to that region.
+- To isolate a same-axis native scrolling region, bind its own `NativeGesture`, call `manager.consumeGesture(true)` in its `onBegin` callback, and include it in `SheetGestureContent.gestureRelations.waitFor`. An unbound region still participates in the ancestor pan.
 - Use `gestureConfig` and `gestureRelations` on `SheetGestureContent` only for recognition thresholds and external gesture relationships. Do not replace the Sheet pan or add per-scroll ownership policies.
 
 ## Side Rules

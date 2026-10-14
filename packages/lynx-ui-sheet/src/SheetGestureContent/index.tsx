@@ -45,17 +45,21 @@ export function SheetGestureContent(props: SheetGestureContentProps) {
     viewportSize: snap.viewportSize,
     sheetSizeMTRef: snap.sheetSizeMTRef,
     getResolvedSnapOffsets: snap.getResolvedSnapOffsets,
+    onSnapChangeMT: snap.onSnapChangeMT,
     onDragStartMT: snap.onDragStartMT,
     onDragEndSnapMT: snap.onDragEndSnapMT,
     onDragEndCloseMT: snap.onDragEndCloseMT,
   })
   const scrollGesture = useSheetNativeScrollGesture({
     sheetGesture,
+    contentDragEnabled: !context.handleOnly && !context.dragDisabled
+      && (gestureConfig?.enabled ?? true),
     activeScrollMTRef,
     resolvedSide: context.resolvedSide,
     position: snap.yRef,
     getResolvedSnapOffsets: snap.getResolvedSnapOffsets,
   })
+  const dragEnabled = !context.dragDisabled && (gestureConfig?.enabled ?? true)
   const resolvedChildren = typeof children === 'function'
     ? children({ scrollGesture })
     : children
@@ -70,8 +74,8 @@ export function SheetGestureContent(props: SheetGestureContentProps) {
     >
       <SheetSurface
         {...surfaceProps}
-        dragHandlers={{ gesture: sheetGesture }}
-        sheetGesture={sheetGesture}
+        dragHandlers={{ gesture: dragEnabled ? sheetGesture : undefined }}
+        sheetGesture={dragEnabled ? sheetGesture : undefined}
         resolvedSide={context.resolvedSide}
         handleOnly={context.handleOnly}
         snapPoints={snapPoints}

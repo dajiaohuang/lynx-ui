@@ -84,7 +84,11 @@ export function SheetSurface(props: SheetSurfaceProps) {
         : undefined}
       main-thread:bindlayoutchange={handleSheetLayoutChangeMT}
     >
-      <SheetDragContext.Provider value={{ dragHandlers }}>
+      <SheetDragContext.Provider
+        value={{
+          dragHandlers: sheetGesture && !handleOnly ? {} : dragHandlers,
+        }}
+      >
         {children}
       </SheetDragContext.Provider>
     </view>

@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   parseScrollInfoAtStart,
+  reconcileSheetGestureRelations,
   setupSheetScrollGestureRelations,
 } from './gestureRelations'
 
@@ -13,8 +14,13 @@ describe('setupSheetScrollGestureRelations', () => {
   function makeFakeGesture() {
     const waitFor: unknown[] = []
     const continueWith: unknown[] = []
+    const simultaneousWith: unknown[] = []
     return {
       waitFor,
+      simultaneousWith,
+      externalSimultaneous(g: unknown) {
+        simultaneousWith.push(g)
+      },
       continueWith,
       externalWaitFor(g: unknown) {
         waitFor.push(g)
@@ -25,12 +31,13 @@ describe('setupSheetScrollGestureRelations', () => {
     }
   }
 
-  it('sets up both waitFor and continueWith relations', () => {
+  it('observes both recognizers simultaneously', () => {
     const native = makeFakeGesture()
     const pan = { type: 'pan' }
     setupSheetScrollGestureRelations(native, pan)
-    expect(native.waitFor).toContain(pan)
-    expect(native.continueWith).toContain(pan)
+    expect(native.waitFor).toEqual([])
+    expect(native.continueWith).toEqual([])
+    expect(native.simultaneousWith).toContain(pan)
   })
 
   it('each relation appears exactly once (idempotent)', () => {
@@ -39,8 +46,32 @@ describe('setupSheetScrollGestureRelations', () => {
     setupSheetScrollGestureRelations(native, pan)
     setupSheetScrollGestureRelations(native, pan)
     setupSheetScrollGestureRelations(native, pan)
-    expect(native.waitFor.filter((g) => g === pan).length).toBe(1)
-    expect(native.continueWith.filter((g) => g === pan).length).toBe(1)
+    expect(native.simultaneousWith.filter((g) => g === pan).length).toBe(1)
+  })
+  it('removes the content dependency when only the handle can drag', () => {
+    const native = makeFakeGesture()
+    setupSheetScrollGestureRelations(native, { id: 1 })
+    setupSheetScrollGestureRelations(native)
+    expect(native.waitFor).toEqual([])
+    expect(native.continueWith).toEqual([])
+    expect(native.simultaneousWith).toEqual([])
+  })
+
+  it('replaces external relations and deduplicates cloned recognizers', () => {
+    const pan = {
+      ...makeFakeGesture(),
+      simultaneousWith: [] as unknown[],
+      externalSimultaneous(g: unknown) {
+        pan.simultaneousWith.push(g)
+      },
+    }
+    reconcileSheetGestureRelations(pan, { waitFor: [{ id: 1 }, { id: 1 }] })
+    expect(pan.waitFor).toHaveLength(1)
+    reconcileSheetGestureRelations(pan, { simultaneousWith: [{ id: 2 }] })
+    expect(pan.waitFor).toEqual([])
+    expect(pan.simultaneousWith).toEqual([{ id: 2 }])
+    reconcileSheetGestureRelations(pan)
+    expect(pan.simultaneousWith).toEqual([])
   })
 })
 

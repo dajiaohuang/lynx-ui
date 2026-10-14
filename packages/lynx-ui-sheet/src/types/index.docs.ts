@@ -141,16 +141,16 @@ export interface SheetContentProps extends ComponentBasicProps {
 
 export type SheetGestureConfig = Pick<
   PanGestureConfig,
-  | 'enabled'
-  | 'minDistance'
-  | 'activeOffsetX'
-  | 'activeOffsetY'
-  | 'failOffsetX'
-  | 'failOffsetY'
+  'enabled' | 'minDistance'
 >
 
 export interface SheetGestureRelations {
   simultaneousWith?: GestureKind[]
+  /**
+   * Gestures that take priority over the Sheet pan. To isolate a same-axis
+   * native scroll region, bind its own NativeGesture and enable native
+   * consumption with manager.consumeGesture(true) in its onBegin callback.
+   */
   waitFor?: GestureKind[]
   continueWith?: GestureKind[]
 }
@@ -163,7 +163,10 @@ export interface SheetGestureRenderProps {
   scrollGesture: NativeGesture
 }
 
-/** A gesture-enabled replacement for SheetContent; all other parts are reused. */
+/**
+ * A gesture-enabled replacement for SheetContent; all other parts are reused.
+ * Requires enableNewGesture: true and LynxSDK 3.2 or newer.
+ */
 export interface SheetGestureContentProps
   extends Omit<SheetContentProps, 'children'>
 {

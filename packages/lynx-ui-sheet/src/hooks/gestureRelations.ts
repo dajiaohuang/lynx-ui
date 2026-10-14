@@ -7,33 +7,67 @@
  * Avoids importing the full gesture-runtime types (which pull in Lynx runtime).
  */
 export interface GestureRelations<TGesture = unknown> {
+  simultaneousWith: TGesture[]
+  externalSimultaneous: (gesture: TGesture) => unknown
   waitFor: TGesture[]
   continueWith: TGesture[]
   externalWaitFor: (gesture: TGesture) => unknown
   externalContinueWith: (gesture: TGesture) => unknown
 }
 
+/** Native IDs survive the gesture-runtime's render-time object clones. */
+function sameGesture(a: unknown, b: unknown): boolean {
+  if (a === b) return true
+  const first = a as { id?: number }
+  const second = b as { id?: number }
+  return first?.id !== undefined && first.id === second?.id
+}
+
+function appendUnique<T>(
+  existing: T[],
+  gesture: T,
+  append: (gesture: T) => unknown,
+) {
+  const kind = gesture as { toGestureArray?: () => T[] }
+  for (const entry of kind?.toGestureArray?.() ?? [gesture]) {
+    if (!existing.some(other => sameGesture(other, entry))) append(entry)
+  }
+}
+
+/** Replace the owned relations, including removal of obsolete prop values. */
+export function reconcileSheetGestureRelations<T>(
+  gesture: GestureRelations<T>,
+  relations?: { waitFor?: T[], continueWith?: T[], simultaneousWith?: T[] },
+): void {
+  gesture.waitFor.splice(0)
+  gesture.continueWith.splice(0)
+  gesture.simultaneousWith.splice(0)
+  for (const entry of relations?.waitFor ?? []) {
+    appendUnique(gesture.waitFor, entry, gesture.externalWaitFor)
+  }
+  for (const entry of relations?.continueWith ?? []) {
+    appendUnique(gesture.continueWith, entry, gesture.externalContinueWith)
+  }
+  for (const entry of relations?.simultaneousWith ?? []) {
+    appendUnique(gesture.simultaneousWith, entry, gesture.externalSimultaneous)
+  }
+}
+
 /**
- * Set up coordinated gesture relations between the native scroll gesture
- * and the pan (sheet drag) gesture.
- *
- * - `waitFor(pan)`: native waits for pan to fail before activating, so pan
- *   claims direct sheet drags first.
- * - `continueWith(pan)`: when native ends, pan may continue on the same touch,
- *   supporting the content→sheet collapse handoff mid-gesture.
- *
- * Idempotent: does not duplicate relations on repeated calls.
+ * Keep both recognizers observing the touch. Consumption selects the owner;
+ * failing either recognizer would stop live boundary observations and depend
+ * on platform-specific continuation ordering.
  */
 export function setupSheetScrollGestureRelations<TGesture>(
   nativeGesture: GestureRelations<TGesture>,
-  sheetGesture: TGesture,
+  sheetGesture?: TGesture,
 ): void {
-  if (!nativeGesture.waitFor.includes(sheetGesture)) {
-    nativeGesture.externalWaitFor(sheetGesture)
-  }
-  if (!nativeGesture.continueWith.includes(sheetGesture)) {
-    nativeGesture.externalContinueWith(sheetGesture)
-  }
+  reconcileSheetGestureRelations(
+    nativeGesture,
+    sheetGesture === undefined
+      ? undefined
+      : { simultaneousWith: [sheetGesture] },
+  )
 }
 
 /**
@@ -44,6 +78,7 @@ export function parseScrollInfoAtStart(
   resolvedSide: 'top' | 'bottom' | 'left' | 'right',
   info: { scrollX?: number, scrollY?: number },
 ): boolean | undefined {
+  'main thread'
   const isHorizontal = resolvedSide === 'left' || resolvedSide === 'right'
   const offset = isHorizontal ? info.scrollX : info.scrollY
   if (offset === undefined) return undefined

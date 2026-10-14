@@ -74,13 +74,13 @@ function App() {
               </text>
             </view>
             <PaymentMethodList />
-            <view className='fixed-actions'>
-              <ActionButton
-                onClick={() => sheetRef.current?.close()}
-                text='Continue'
-              />
-            </view>
           </SheetGestureContent>
+          <view className='fixed-actions'>
+            <ActionButton
+              onClick={() => sheetRef.current?.close()}
+              text='Continue'
+            />
+          </view>
         </SheetView>
       </SheetRoot>
     </view>
