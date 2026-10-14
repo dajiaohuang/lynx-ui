@@ -6,8 +6,8 @@ import { root, useRef } from '@lynx-js/react'
 
 import {
   SheetBackdrop,
-  SheetGestureContent,
   SheetHandle,
+  SheetNestedScrollContent,
   SheetRoot,
   SheetView,
   useSheetScrollGesture,
@@ -61,7 +61,7 @@ function App() {
       >
         <SheetView className='sheet-viewport'>
           <SheetBackdrop className='sheet-overlay' />
-          <SheetGestureContent
+          <SheetNestedScrollContent
             className='sheet-content'
             innerClassName='gesture-sheet-inner'
           >
@@ -73,7 +73,7 @@ function App() {
               </text>
             </view>
             <NestedList />
-          </SheetGestureContent>
+          </SheetNestedScrollContent>
         </SheetView>
       </SheetRoot>
     </view>

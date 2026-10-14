@@ -12,18 +12,18 @@ Use it when a UI needs a dismissible panel that slides from an edge of the viewp
 - **`SheetView`**: Renders the sheet subtree in the overlay layer and controls mount/unmount.
 - **`SheetBackdrop`**: Renders the scrim behind the sheet and optionally closes the sheet on tap.
 - **`SheetContent`**: Renders the moving sheet or drawer surface and receives consumer sizing/styling.
-- **`SheetGestureContent`**: Drop-in content layer for gesture-runtime input and nested native scrolling. Keep `SheetContent` for the existing raw-touch behavior.
+- **`SheetNestedScrollContent`**: Content layer that coordinates sheet dragging and nested native scrolling. Keep `SheetContent` for the existing raw-touch behavior.
 - **`SheetHandle`**: Optional drag handle. It renders its `children`, so custom handle visuals can be placed directly inside the draggable target. Use it for bottom sheets when a visible handle is desired; horizontal drawers usually do not need it unless the design intentionally calls for a side grip.
 
 ## Nested Scroll Rules
 
 - Enable `enableNewGesture: true` and use LynxSDK 3.2 or newer.
-- Use `SheetGestureContent` for nested native scrolling with `scroll-view` or `list`.
+- Use `SheetNestedScrollContent` for nested native scrolling with `scroll-view` or `list`.
 - Prefer its render prop for a nearby scroll node: bind `scrollGesture` to the outermost vertical scrolling node with `main-thread:gesture`.
-- In deeply nested content, call the argument-free `useSheetScrollGesture()` Hook. It returns the same gesture object created by the nearest `SheetGestureContent`; it does not create or configure another gesture.
+- In deeply nested content, call the argument-free `useSheetScrollGesture()` Hook. It returns the same gesture object created by the nearest `SheetNestedScrollContent`; it does not create or configure another gesture.
 - The ownership rule is fixed and directionally natural: upward drags expand the Sheet to its maximum snap before content scrolls; downward drags scroll content to its start before the Sheet collapses. Handoff can occur without lifting the finger.
-- To isolate a same-axis native scrolling region, bind its own `NativeGesture`, call `manager.consumeGesture(true)` in its `onBegin` callback, and include it in `SheetGestureContent.gestureRelations.waitFor`. An unbound region still participates in the ancestor pan.
-- Use `gestureConfig` and `gestureRelations` on `SheetGestureContent` only for recognition thresholds and external gesture relationships. Do not replace the Sheet pan or add per-scroll ownership policies.
+- To isolate a same-axis native scrolling region, bind its own `NativeGesture`, call `manager.consumeGesture(true)` in its `onBegin` callback, and include it in `SheetNestedScrollContent.gestureRelations.waitFor`. An unbound region still participates in the ancestor pan.
+- Use `gestureConfig` and `gestureRelations` on `SheetNestedScrollContent` only for recognition thresholds and external gesture relationships. Do not replace the Sheet pan or add per-scroll ownership policies.
 
 ## Side Rules
 

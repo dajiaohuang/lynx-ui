@@ -6,8 +6,8 @@ import { root, useRef } from '@lynx-js/react'
 
 import {
   SheetBackdrop,
-  SheetGestureContent,
   SheetHandle,
+  SheetNestedScrollContent,
   SheetRoot,
   SheetView,
   useSheetScrollGesture,
@@ -62,7 +62,7 @@ function App() {
       <SheetRoot ref={sheetRef} snapPoints={['55%', '90%']} initialSnap={0}>
         <SheetView className='sheet-viewport'>
           <SheetBackdrop className='sheet-overlay' />
-          <SheetGestureContent
+          <SheetNestedScrollContent
             className='sheet-content payment-sheet'
             innerClassName='payment-layout'
           >
@@ -74,7 +74,7 @@ function App() {
               </text>
             </view>
             <PaymentMethodList />
-          </SheetGestureContent>
+          </SheetNestedScrollContent>
           <view className='fixed-actions'>
             <ActionButton
               onClick={() => sheetRef.current?.close()}

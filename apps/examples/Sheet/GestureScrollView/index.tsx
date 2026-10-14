@@ -6,8 +6,8 @@ import { root, useRef } from '@lynx-js/react'
 
 import {
   SheetBackdrop,
-  SheetGestureContent,
   SheetHandle,
+  SheetNestedScrollContent,
   SheetRoot,
   SheetView,
 } from '@lynx-js/lynx-ui'
@@ -39,7 +39,7 @@ function App() {
       <SheetRoot ref={sheetRef} snapPoints={['45%', '90%']} initialSnap={0}>
         <SheetView className='sheet-viewport'>
           <SheetBackdrop className='sheet-overlay' />
-          <SheetGestureContent
+          <SheetNestedScrollContent
             className='sheet-content'
             innerClassName='gesture-sheet-inner'
           >
@@ -72,7 +72,7 @@ function App() {
                 </scroll-view>
               </>
             )}
-          </SheetGestureContent>
+          </SheetNestedScrollContent>
         </SheetView>
       </SheetRoot>
     </view>

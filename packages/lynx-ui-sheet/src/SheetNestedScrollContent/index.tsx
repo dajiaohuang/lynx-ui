@@ -12,14 +12,14 @@ import {
   useSheetPanGesture,
 } from '../hooks/useSheetGestures'
 import { SheetSurface } from '../SheetSurface'
-import type { SheetGestureContentProps } from '../types'
+import type { SheetNestedScrollContentProps } from '../types'
 
 /**
- * A gesture-runtime backed replacement for SheetContent.
+ * A SheetContent replacement that coordinates sheet dragging and native scrolling.
  * It creates one coordinated native scroll gesture and exposes that same
  * gesture through both its render prop and useSheetScrollGesture().
  */
-export function SheetGestureContent(props: SheetGestureContentProps) {
+export function SheetNestedScrollContent(props: SheetNestedScrollContentProps) {
   const {
     children,
     gestureConfig,

@@ -1714,15 +1714,16 @@ The main content of the Sheet.
 ]}/>
 
 
-### SheetGestureContent
+### SheetNestedScrollContent
 
-A gesture-enabled replacement for SheetContent; all other parts are reused.
+A SheetContent replacement that coordinates sheet dragging and native scrolling;
+all other parts are reused.
 Requires enableNewGesture: true and LynxSDK 3.2 or newer.
 
 <UIApiTable source={[
   {
     "name": "children",
-    "type": "ReactNode | (props: SheetGestureRenderProps) => ReactNode",
+    "type": "ReactNode | (props: SheetNestedScrollRenderProps) => ReactNode",
     "summary": [
       {
         "kind": "text",

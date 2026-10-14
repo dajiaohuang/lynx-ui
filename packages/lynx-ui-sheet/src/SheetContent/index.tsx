@@ -9,7 +9,7 @@ import type { SheetContentProps } from '../types'
 
 /**
  * The touch-event based Sheet surface.
- * Use SheetGestureContent when the Sheet contains a native scroll container.
+ * Use SheetNestedScrollContent when the Sheet contains a native scroll container.
  */
 export function SheetContent(props: SheetContentProps) {
   const { context, effectiveRubberBand, snap, snapPoints } =

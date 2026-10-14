@@ -275,7 +275,7 @@ function getDefaultScrollStartBoundary(
   return scrollOffset === undefined ? undefined : scrollOffset <= 0
 }
 
-/** Create the NativeGesture shared by SheetGestureContent descendants. */
+/** Create the NativeGesture shared by SheetNestedScrollContent descendants. */
 export function useSheetNativeScrollGesture({
   sheetGesture,
   contentDragEnabled = true,
@@ -421,7 +421,7 @@ export function useSheetNativeScrollGesture({
   return nativeGesture
 }
 
-/** Return the scroll gesture owned by the nearest SheetGestureContent. */
+/** Return the scroll gesture owned by the nearest SheetNestedScrollContent. */
 export function useSheetScrollGesture(): NativeGesture {
   return getSheetScrollGesture(useSheetGestureContext())
 }

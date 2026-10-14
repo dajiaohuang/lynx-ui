@@ -44,15 +44,15 @@ The `Sheet` component is composed of several specialized sub-components to give 
 - **`SheetView`**: The viewport container for the sheet components.
 - **`SheetBackdrop`**: The dimmed overlay behind the sheet. Can be configured to close the sheet on tap.
 - **`SheetContent`**: The actual sliding panel that contains your content.
-- **`SheetGestureContent`**: A gesture-runtime backed replacement for
-  `SheetContent`, intended for nested scrolling.
+- **`SheetNestedScrollContent`**: A replacement for `SheetContent` that coordinates
+  sheet dragging with nested native scrolling.
 - **`SheetHandle`**: (Optional) A draggable visual indicator (usually a small bar) at the top of the sheet content.
 
 ## Nested scrolling
 
 Enable `enableNewGesture: true` in the Rspeedy config and use LynxSDK 3.2 or newer.
 
-Replace only the content layer with `SheetGestureContent`, then bind its
+Replace only the content layer with `SheetNestedScrollContent`, then bind its
 coordinated gesture to the outermost vertical native scrolling node. The render
 prop is the most explicit path:
 
@@ -60,13 +60,13 @@ prop is the most explicit path:
 <SheetRoot snapPoints={['40%', '90%']}>
   <SheetView>
     <SheetBackdrop />
-    <SheetGestureContent>
+    <SheetNestedScrollContent>
       {({ scrollGesture }) => (
         <list main-thread:gesture={scrollGesture}>
           {/* list items */}
         </list>
       )}
-    </SheetGestureContent>
+    </SheetNestedScrollContent>
   </SheetView>
 </SheetRoot>
 ```
@@ -82,7 +82,7 @@ function Results() {
 ```
 
 Both access paths expose the same gesture created by the nearest
-`SheetGestureContent`; calling the Hook does not create another recognizer. Bind
+`SheetNestedScrollContent`; calling the Hook does not create another recognizer. Bind
 it to the outermost vertical scrolling node. The built-in ownership rule matches
 common bottom-sheet behavior: an upward drag expands the Sheet to its maximum
 snap before content scrolls, while a downward drag scrolls content back to its
@@ -92,7 +92,7 @@ and include it in `gestureRelations.waitFor`. Leaving it unbound does not
 isolate it from the ancestor Sheet pan.
 
 `gestureConfig` and `gestureRelations` remain available on
-`SheetGestureContent` for recognition thresholds and relationships with external
+`SheetNestedScrollContent` for recognition thresholds and relationships with external
 gestures. They configure the single coordinator rather than individual scrolling
 nodes.
 

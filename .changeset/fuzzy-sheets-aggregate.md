@@ -2,4 +2,4 @@
 "@lynx-js/lynx-ui": minor
 ---
 
-Export the gesture-enabled Sheet content and nested scroll hook.
+Export `SheetNestedScrollContent` and the nested scroll hook.

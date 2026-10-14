@@ -8,14 +8,14 @@ import { describe, expect, it } from 'vitest'
 import { getSheetScrollGesture } from './sheetScrollGesture'
 
 describe('getSheetScrollGesture', () => {
-  it('returns the exact gesture owned by SheetGestureContent', () => {
+  it('returns the exact gesture owned by SheetNestedScrollContent', () => {
     const scrollGesture = { id: 1 } as NativeGesture
     expect(getSheetScrollGesture({ scrollGesture })).toBe(scrollGesture)
   })
 
-  it('rejects use outside SheetGestureContent', () => {
+  it('rejects use outside SheetNestedScrollContent', () => {
     expect(() => getSheetScrollGesture({})).toThrow(
-      'useSheetScrollGesture must be used inside SheetGestureContent',
+      'useSheetScrollGesture must be used inside SheetNestedScrollContent',
     )
   })
 })

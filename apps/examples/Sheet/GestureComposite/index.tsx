@@ -6,8 +6,8 @@ import { root, useRef } from '@lynx-js/react'
 
 import {
   SheetBackdrop,
-  SheetGestureContent,
   SheetHandle,
+  SheetNestedScrollContent,
   SheetRoot,
   SheetView,
   useSheetScrollGesture,
@@ -86,7 +86,7 @@ function App() {
       <SheetRoot ref={sheetRef} snapPoints={['45%', '90%']} initialSnap={0}>
         <SheetView className='sheet-viewport'>
           <SheetBackdrop className='sheet-overlay' />
-          <SheetGestureContent
+          <SheetNestedScrollContent
             className='sheet-content'
             innerClassName='composite-layout'
           >
@@ -95,7 +95,7 @@ function App() {
               <text className='handle-label'>Drag handle</text>
             </SheetHandle>
             <FoldLikeContent />
-          </SheetGestureContent>
+          </SheetNestedScrollContent>
         </SheetView>
       </SheetRoot>
     </view>

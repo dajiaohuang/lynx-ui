@@ -155,7 +155,7 @@ export interface SheetGestureRelations {
   continueWith?: GestureKind[]
 }
 
-export interface SheetGestureRenderProps {
+export interface SheetNestedScrollRenderProps {
   /**
    * The coordinated native gesture to bind to the outermost vertical scrolling
    * node. This is the same object returned by useSheetScrollGesture().
@@ -164,10 +164,11 @@ export interface SheetGestureRenderProps {
 }
 
 /**
- * A gesture-enabled replacement for SheetContent; all other parts are reused.
+ * A SheetContent replacement that coordinates sheet dragging and native scrolling;
+ * all other parts are reused.
  * Requires enableNewGesture: true and LynxSDK 3.2 or newer.
  */
-export interface SheetGestureContentProps
+export interface SheetNestedScrollContentProps
   extends Omit<SheetContentProps, 'children'>
 {
   /**
@@ -175,7 +176,7 @@ export interface SheetGestureContentProps
    * gesture. Deep descendants can access the same gesture with
    * useSheetScrollGesture().
    */
-  children?: ReactNode | ((props: SheetGestureRenderProps) => ReactNode)
+  children?: ReactNode | ((props: SheetNestedScrollRenderProps) => ReactNode)
   /** Native pan recognition thresholds. */
   gestureConfig?: SheetGestureConfig
   /** Relationships between the Sheet pan and external gestures. */

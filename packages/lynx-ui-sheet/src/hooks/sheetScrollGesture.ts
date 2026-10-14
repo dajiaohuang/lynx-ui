@@ -12,7 +12,7 @@ export function getSheetScrollGesture(
 ): NativeGesture {
   if (!context.scrollGesture) {
     throw new Error(
-      'useSheetScrollGesture must be used inside SheetGestureContent',
+      'useSheetScrollGesture must be used inside SheetNestedScrollContent',
     )
   }
   return context.scrollGesture as NativeGesture
