@@ -44,7 +44,58 @@ The `Sheet` component is composed of several specialized sub-components to give 
 - **`SheetView`**: The viewport container for the sheet components.
 - **`SheetBackdrop`**: The dimmed overlay behind the sheet. Can be configured to close the sheet on tap.
 - **`SheetContent`**: The actual sliding panel that contains your content.
+- **`SheetNestedScrollContent`**: A replacement for `SheetContent` that coordinates
+  sheet dragging with nested native scrolling.
+- **`SheetFooter`**: An optional measured action region pinned to the visible bottom sheet.
 - **`SheetHandle`**: (Optional) A draggable visual indicator (usually a small bar) at the top of the sheet content.
+
+## Nested scrolling
+
+Enable `enableNewGesture: true` in the Rspeedy config and use LynxSDK 3.2 or newer.
+
+Replace only the content layer with `SheetNestedScrollContent`, then bind its
+coordinated gesture to the outermost vertical native scrolling node. The render
+prop is the most explicit path:
+
+```tsx
+<SheetRoot snapPoints={['40%', '90%']}>
+  <SheetView>
+    <SheetBackdrop />
+    <SheetNestedScrollContent>
+      {({ scrollGesture }) => (
+        <list main-thread:gesture={scrollGesture}>
+          {/* list items */}
+        </list>
+      )}
+    </SheetNestedScrollContent>
+  </SheetView>
+</SheetRoot>
+```
+
+For deeply nested content, use the argument-free Hook instead of forwarding the
+gesture through every component:
+
+```tsx
+function Results() {
+  const scrollGesture = useSheetScrollGesture()
+  return <list main-thread:gesture={scrollGesture}>{/* list items */}</list>
+}
+```
+
+Both access paths expose the same gesture created by the nearest
+`SheetNestedScrollContent`; calling the Hook does not create another recognizer. Bind
+it to the outermost vertical scrolling node. The built-in ownership rule matches
+common bottom-sheet behavior: an upward drag expands the Sheet to its maximum
+snap before content scrolls, while a downward drag scrolls content back to its
+start before the Sheet collapses. Both transfers can occur without lifting the
+finger. For an independent region on the same axis, bind a separate consuming `NativeGesture`
+and include it in `gestureRelations.waitFor`. Leaving it unbound does not
+isolate it from the ancestor Sheet pan.
+
+`gestureConfig` and `gestureRelations` remain available on
+`SheetNestedScrollContent` for recognition thresholds and relationships with external
+gestures. They configure the single coordinator rather than individual scrolling
+nodes.
 
 ## About @lynx-js/lynx-ui
 

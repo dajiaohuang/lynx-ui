@@ -42,6 +42,8 @@ const primitivesConfig: Record<string, string[]> = {
     'SheetBackdrop',
     'SheetView',
     'SheetContent',
+    'SheetNestedScrollContent',
+    'SheetFooter',
   ],
   'lynx-ui-dialog': [
     'DialogRoot',
