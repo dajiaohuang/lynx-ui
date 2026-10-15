@@ -29,7 +29,7 @@ function PaymentMethodList({ footerHeight }: { footerHeight: number }) {
   return (
     <scroll-view
       className='payment-methods'
-      style={{ paddingBottom: footerHeight }}
+      style={{ paddingBottom: `${footerHeight}px` }}
       scroll-orientation='vertical'
       bounces={false}
       main-thread:gesture={gesture}
