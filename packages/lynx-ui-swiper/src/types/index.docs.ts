@@ -389,7 +389,6 @@ export interface BounceConfig {
    */
   onStartBounceItemBounce?: (bounceParams: OnBounceParams) => void
   /**
-   *                       ·····   ··
    * When endBounceItem is in bounce state, releasing finger will call this.
    * @Android
    * @iOS
