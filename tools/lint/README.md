@@ -6,6 +6,13 @@ rule registration and compatibility plugins in one place. Callers can supply
 their repository root, React package, import grouping, additional ignored paths,
 syntax-rule exclusions, copyright year, and an optional common typed project.
 
+Interfaces and type aliases use PascalCase in all authored TypeScript files,
+including documentation sources, tests, and tooling. The native
+`@typescript-eslint/naming-convention` rule permits acronyms such as `UI` and
+`OTP`; it does not constrain hook names, properties, or generic parameters.
+Keep compatibility exceptions on individual deprecated public alias declarations
+with an explanatory rule suppression rather than exempting a file or name pattern.
+
 Typed source scopes are configurable with `sourceFiles` and `sourceIgnores`;
 tooling scopes use `toolingFiles` and `toolingIgnores`. The same scopes select
 the type-checked presets and their parser projects. `testFiles` selects files
