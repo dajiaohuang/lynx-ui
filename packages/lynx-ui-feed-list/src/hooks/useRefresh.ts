@@ -76,8 +76,7 @@ export enum RefreshState {
   DRAGGING = 3,
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention -- Preserve the existing exported type name for compatibility.
-export interface useRefreshAndBounceOptions {
+export interface UseRefreshAndBounceOptions {
   refreshOptions: RefreshProps
   bounceableOptions: BounceableBasicProps
   debugLog?: boolean
@@ -112,7 +111,7 @@ interface BouncingPositionInfo {
 }
 
 export function useRefreshAndBounce(
-  options: useRefreshAndBounceOptions,
+  options: UseRefreshAndBounceOptions,
 ): UseRefreshAndBounceReturn {
   // Control the damping coefficient during rubber effect. The smaller it is, the harder the spring effect.
   const rubberC = useMainThreadRef(0.55)

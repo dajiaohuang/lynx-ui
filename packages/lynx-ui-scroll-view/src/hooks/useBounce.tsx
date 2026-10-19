@@ -28,8 +28,7 @@ export interface BounceableBasicProps {
   onScrollToBounces?: (e: ScrollToBouncesInfo) => void
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention -- Preserve the existing exported type name for compatibility.
-export interface useBounceOptions {
+export interface UseBounceOptions {
   bounceableOptions: BounceableBasicProps
   debugLog?: boolean
   enableRTL?: boolean
@@ -59,7 +58,7 @@ export interface BounceHandlers {
 // eslint-disable-next-line @typescript-eslint/naming-convention -- Preserve the deprecated public alias for compatibility.
 export type bounceHandlers = BounceHandlers
 
-export function useBounce(options: useBounceOptions): BounceHandlers {
+export function useBounce(options: UseBounceOptions): BounceHandlers {
   // Control the damping coefficient during rubber effect. The smaller it is, the harder the spring effect.
   const rubberC = useMainThreadRef(0.55)
   // Control the fling deceleration coefficient during dropdown. The smaller it is, the faster it stops.

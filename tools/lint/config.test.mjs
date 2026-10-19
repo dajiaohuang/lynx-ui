@@ -60,6 +60,12 @@ test('PascalCase type names cover source, docs, tests and tooling', t => {
       1,
     ],
     [
+      'packages/example/src/hook-types.ts',
+      'export interface useExampleOptions { enabled: boolean }\n'
+      + 'export type useExampleResult = { ready: boolean }',
+      2,
+    ],
+    [
       'packages/example/src/types/index.docs.ts',
       'export interface lowercaseEvent { offset: number }',
       1,
@@ -83,6 +89,8 @@ test('PascalCase type names cover source, docs, tests and tooling', t => {
     [
       'packages/example/src/valid.tsx',
       'export interface InputOTPProps { onChange?: (value: string) => void }\n'
+      + 'export interface UseExampleOptions { enabled: boolean }\n'
+      + 'export type UseExampleResult = { ready: boolean }\n'
       + 'export type ComponentUIVariants = { active: boolean }\n'
       + 'export type Identity<value> = (input: value) => value\n'
       + 'export function useExample(options: InputOTPProps) { return options }',
@@ -95,13 +103,6 @@ test('PascalCase type names cover source, docs, tests and tooling', t => {
       + '// eslint-disable-next-line @typescript-eslint/naming-convention -- Preserve the deprecated public alias for compatibility.\n'
       + 'export type legacyOptions = CanonicalOptions\n'
       + 'export type anotherLegacyOptions = CanonicalOptions',
-      1,
-    ],
-    [
-      'packages/example/src/legacy-interface.ts',
-      '// eslint-disable-next-line @typescript-eslint/naming-convention -- Preserve the existing exported type name for compatibility.\n'
-      + 'export interface legacyOptions { value: string }\n'
-      + 'export interface newLowercaseOptions { value: string }',
       1,
     ],
   ]
