@@ -20,7 +20,8 @@ import type {
   UseDragOptions,
 } from './types/index.docs'
 
-export interface UseDragInternalOptions {
+// eslint-disable-next-line @typescript-eslint/naming-convention -- Preserve the existing exported type name for compatibility.
+export interface useDragInternalOptions {
   /**
    * The main-thread:ref of the draggable node.
    * @iOS
@@ -32,7 +33,8 @@ export interface UseDragInternalOptions {
   draggableNodeRef: RefObject<MainThread.Element | null>
 }
 
-export interface UseDraggableEventsHandlers {
+// eslint-disable-next-line @typescript-eslint/naming-convention -- Preserve the existing exported type name for compatibility.
+export interface useDraggableEventsHandlers {
   'main-thread:bindlongpress'?: (
     event: MainThread.TouchEvent | MainThread.MouseEvent,
   ) => void
@@ -69,7 +71,7 @@ interface DraggableActions {
 }
 
 export interface UseDraggableReturnType extends DraggableActions {
-  eventHandlers: UseDraggableEventsHandlers | Record<string, never>
+  eventHandlers: useDraggableEventsHandlers | Record<string, never>
   /** Compatibility alias. Prefer individual methods for hook dependencies. */
   utils: DraggableActions
 }
@@ -95,7 +97,7 @@ function noopOnMainThread() {
 }
 
 export const useDraggable = (
-  options: UseDragOptions & UseDragInternalOptions,
+  options: UseDragOptions & useDragInternalOptions,
 ): UseDraggableReturnType => {
   const {
     draggableNodeRef,

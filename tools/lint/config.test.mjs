@@ -97,6 +97,13 @@ test('PascalCase type names cover source, docs, tests and tooling', t => {
       + 'export type anotherLegacyOptions = CanonicalOptions',
       1,
     ],
+    [
+      'packages/example/src/legacy-interface.ts',
+      '// eslint-disable-next-line @typescript-eslint/naming-convention -- Preserve the existing exported type name for compatibility.\n'
+      + 'export interface legacyOptions { value: string }\n'
+      + 'export interface newLowercaseOptions { value: string }',
+      1,
+    ],
   ]
   for (const [file, code] of probes) {
     const target = path.join(cwd, file)

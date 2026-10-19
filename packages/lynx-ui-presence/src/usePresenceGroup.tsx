@@ -17,7 +17,8 @@ import { PresenceState } from './utils'
 
 export const PresenceContext = createContext<PresenceContextType>(null!)
 
-export interface UsePresenceGroupProps {
+// eslint-disable-next-line @typescript-eslint/naming-convention -- Preserve the existing exported type name for compatibility.
+export interface usePresenceGroupProps {
   show: boolean
   forceMount: boolean
   setGroupState?: (state: PresenceState) => void
@@ -31,15 +32,16 @@ export interface UsePresenceGroupProps {
   debugLog?: boolean
 }
 
-export interface UsePresenceGroupReturnType {
+// eslint-disable-next-line @typescript-eslint/naming-convention -- Preserve the existing exported type name for compatibility.
+export interface usePresenceGroupReturnType {
   renderChildren: ReactNode
   mountView: boolean
 }
 // Manage a group of Presence components.
 // Wrap all child nodes with Presence and ensure that the onOpen and onClose events are triggered after all animations are completed.
 export const usePresenceGroup: (
-  props: UsePresenceGroupProps,
-) => UsePresenceGroupReturnType = (props) => {
+  props: usePresenceGroupProps,
+) => usePresenceGroupReturnType = (props) => {
   const {
     show,
     forceMount = false,
