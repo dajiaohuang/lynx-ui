@@ -74,7 +74,7 @@ export interface InputInputEvent {
    * @Web
    * @since 3.4
    */
-  isComposing: boolean
+  isComposing?: boolean
 }
 
 export interface InputSelectionEvent {

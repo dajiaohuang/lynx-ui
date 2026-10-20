@@ -5,15 +5,15 @@
 import {
   forwardRef,
   memo,
-  runOnBackground,
   useContext,
   useEffect,
   useImperativeHandle,
   useRef,
+  useState,
 } from '@lynx-js/react'
 import type { ForwardedRef } from '@lynx-js/react'
 
-import { InvokeRejectError, setNativePropsByRef } from '@lynx-js/lynx-ui-common'
+import { InvokeRejectError } from '@lynx-js/lynx-ui-common'
 import type { NodesRef } from '@lynx-js/types'
 
 import { KeyboardAwareTriggerContext } from './KeyboardAwareContext'
@@ -59,6 +59,8 @@ function TextAreaImpl(props: TextAreaProps, ref: ForwardedRef<TextAreaRef>) {
   } = props
 
   const controlled = useRef<boolean>(value !== undefined)
+  const nativeValue = useRef<string>()
+  const [inputRevision, setInputRevision] = useState(0)
 
   const inputRef = useRef<NodesRef>(null)
   const { onInputBlurred, onInputFocused } = useContext(
@@ -66,8 +68,11 @@ function TextAreaImpl(props: TextAreaProps, ref: ForwardedRef<TextAreaRef>) {
   )
 
   useEffect(() => {
-    setValue(value ?? '')
-  }, [value])
+    const nextValue = value ?? ''
+    if (controlled.current && nativeValue.current !== nextValue) {
+      setValue(nextValue)
+    }
+  }, [value, inputRevision])
 
   useEffect(() => {
     if (!controlled.current) {
@@ -109,6 +114,7 @@ function TextAreaImpl(props: TextAreaProps, ref: ForwardedRef<TextAreaRef>) {
     value: string,
   ): Promise<void> =>
     new Promise((resolve, reject) => {
+      nativeValue.current = value
       inputRef.current
         ?.invoke({
           method: 'setValue',
@@ -188,33 +194,14 @@ function TextAreaImpl(props: TextAreaProps, ref: ForwardedRef<TextAreaRef>) {
     onSelectionChange?.(res.detail.selectionStart, res.detail.selectionEnd)
   }
 
-  const sendInputEvent = (
-    value: string,
-    selectionStart: number,
-    selectionEnd: number,
-    isComposing: boolean,
-    unlockInteraction = false,
-  ) => {
-    onInput?.(value, selectionStart, selectionEnd, isComposing)
-    if (unlockInteraction) {
-      setNativePropsByRef(inputRef, { readonly: false })
-    }
-  }
-
   const onInputContentDidChanged = (res: { detail: InputInputEvent }) => {
-    'main thread'
+    const { value, selectionStart, selectionEnd, isComposing } = res.detail
+    nativeValue.current = value
     if (controlled.current) {
-      // @ts-expect-error TODO: fix the typings of MTS
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-      res.currentTarget.setAttribute('readonly', true)
+      // Reconcile even when the parent rejects an edit without changing its value.
+      setInputRevision(revision => revision + 1)
     }
-    runOnBackground(sendInputEvent)(
-      res.detail.value,
-      res.detail.selectionStart,
-      res.detail.selectionEnd,
-      res.detail.isComposing,
-      controlled.current,
-    )
+    onInput?.(value, selectionStart, selectionEnd, isComposing)
   }
 
   useImperativeHandle(
@@ -245,7 +232,7 @@ function TextAreaImpl(props: TextAreaProps, ref: ForwardedRef<TextAreaRef>) {
       input-filter={inputFilter}
       maxlength={maxLength}
       show-soft-input-on-focus={showSoftInputOnFocus}
-      main-thread:bindinput={onInputContentDidChanged}
+      bindinput={onInputContentDidChanged}
       bindfocus={onInputDidFocused}
       bindblur={onInputDidBlurred}
       bindconfirm={onInputDidConfirm}

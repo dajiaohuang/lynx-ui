@@ -116,15 +116,15 @@ either. Do not add these props to generated consumer code.
   `undefined`. Do not combine `value` and `defaultValue`.
 - Mirror the incoming text in `onInput` immediately, including composing text.
   Debounce requests or expensive validation separately from the value update.
-  Controlled input briefly sets native `readonly` while dispatching the callback
-  to the background thread, then unlocks it when the callback returns; keep this
-  callback short and avoid throwing from it.
+  Input callbacks run on the background thread. Controlled values reconcile
+  after each native edit without toggling `readonly`; accepted text is not
+  written back to the native field, preserving its selection and composition.
 - Skip destructive formatting, cursor rewrites, and submission while
   `isComposing === true`. Keep the raw editing value separate from a normalized
   submitted value when necessary.
-- Do not rely on returning the same controlled value to reject a native edit:
-  the value effect runs when the prop changes. Prefer `inputFilter` for simple
-  character restrictions and validate complete values on blur or confirmation.
+- Keeping the controlled value unchanged rejects a native edit. Prefer
+  `inputFilter` for simple character restrictions to avoid a background-thread
+  correction, and validate complete values on blur or confirmation.
 - `defaultValue` is initialization only. Reset uncontrolled fields through
   `ref.setValue('')`; reset controlled fields through their state setter.
 - Do not assume programmatic `setValue` is silent or produces exactly one
