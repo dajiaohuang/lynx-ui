@@ -166,6 +166,7 @@ pnpm check:all
 - **`pnpm check:manypkg`**: Checks for dependency mismatches in the monorepo.
 - **`pnpm check:sherif`**: Lints `package.json` files for potential issues using Sherif.
 - **`pnpm check:exports`**: Verifies that `@lynx-js/lynx-ui` re-exports the expected public surface from included sub-packages.
+- **`pnpm check:package-readmes`**: Verifies that every package under `packages/` has a `README_zh.md`.
 - **`pnpm spell`**: Runs CSpell to check for spelling errors.
 
 ## Publishing
@@ -292,21 +293,32 @@ Main Thread Script allows executing JavaScript on the main thread. It is often u
 ### Linting & Formatting
 
 This project uses **Rslint** for JavaScript and TypeScript linting, a JSONC-capable lint check (`pnpm lint:json`) for JSON files, and **dprint** for formatting.
-The JSON check runs `eslint-plugin-jsonc` and CSpell through a standalone ESLint runner because Rslint does not support the JSONC parser.
+The JSON check runs `eslint-plugin-jsonc` and CSpell through ESLint's API because Rslint does not support the JSONC parser.
 
-Keep the explicit JavaScript and test projects (`tsconfig.rslint-js.json` and
-`tsconfig.rslint-tests.json`) aligned with their lint scopes. Package build
+Lint infrastructure lives in `tools/lint/`: the shared configuration factory,
+JSON runner, typed-project base, and changed-file checker. Repository entry
+points delegate to those helpers. See `tools/lint/README.md` for caller options.
+
+Keep the explicit lint project (`tools/lint/tsconfig.json`) aligned with its
+JavaScript, test, and tooling scopes. Package build
 projects exclude tests and usually exclude JavaScript; without matching project
 information, type-aware rules can silently skip these files. Validate lint-rule
 migrations with both violation and valid-code fixtures, not only a green lint run.
 The local compatibility plugin preserves Biome's complex-array spelling policy;
 do not replace it with a stricter native array mode without checking valid cases.
 When adding an ordinary React workspace, include it in the dependency-check
-scope in `rslint.config.mjs`; ReactLynx's custom stable callbacks are not covered
+scope in `tools/lint/config.mjs`; ReactLynx's custom stable callbacks are not covered
 by that React-only compatibility scope.
+
+Consumers with other directory layouts must configure `sourceFiles`,
+`sourceIgnores`, `toolingFiles`, `toolingIgnores`, and `testFiles` in the shared
+factory and include those files in their lint project. Run
+`node --test tools/lint/*.test.mjs` after changing shared lint infrastructure.
 
 - Run checks: `pnpm check`
 - Run all lint checks: `pnpm lint`
+- Check changed files without writing: `pnpm check:changed`. Use
+  `pnpm fix:changed` to apply fixes.
 - Fix issues: `pnpm fix:all`
 
 ### Documentation & Markdown
@@ -331,6 +343,19 @@ by that React-only compatibility scope.
 
 1. **Changesets**: All changes that affect package versions must include a changeset (`pnpm changeset`).
    Changesets must not target workspace packages with `"private": true`. Remove private package entries before submission, or make the package publishable when it must be versioned and tagged.
+   Release coverage runs only on PRs from `changeset-release/main`. It compares
+   the source snapshot on `main` with the latest tagged release on main's
+   first-parent history, then requires a version bump in the release PR for each
+   changed publishable package under `packages/`, `apps/examples/`, and
+   `luna/packages/`. It ignores documentation, tests, and JavaScript/TypeScript
+   comment or formatting changes; public type changes still need coverage.
+   Fetch complete history and tags before running
+   `pnpm check:changesets-coverage --ref <source-sha> --release-ref <release-sha>`.
+   Use `--since <release-ref>` to select an explicit release baseline. Missing
+   coverage blocks the release PR, not its creation or ordinary PRs. Add missing
+   changesets to `main` and let the release workflow regenerate the release PR.
+   The check covers only the current release window; it does not carry uncovered
+   changes forward from earlier releases or maintain no-release exemptions.
 2. **Toolchain Updates**: Keep `.nvmrc`, `package.json` `engines`/`packageManager`, `pnpm-lock.yaml`, and GitHub Actions `actions/setup-node` versions aligned when changing Node.js or pnpm.
 3. **Pull Request Titles**: Pull request titles **MUST** use a Conventional Commits style prefix that starts the title, such as `fix(swiper): preserve release velocity on Android`.
    Do not prepend labels like `[codex]` before the release type, because the semantic PR check parses the type from the beginning of the title.

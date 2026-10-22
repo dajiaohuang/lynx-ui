@@ -48,16 +48,27 @@ jobs:
           pnpm check:mdx
           pnpm dprint check
           pnpm dlx sherif@latest
+      - name: Package Chinese README Check
+        run: |
+          pnpm test:package-readmes
+          pnpm check:package-readmes
       - name: Changeset Script Tests
         run: |
           pnpm test:changeset-files
+          pnpm test:changesets-coverage
           pnpm test:changesets-private
+      - name: Lint Infrastructure Tests
+        run: node --test tools/lint/*.test.mjs
       - name: Changeset Validation
         run: |
           pnpm check:changesets
           pnpm check:changesets-private
-      - name: Changeset Check
-        run: pnpm changeset status --since=origin/main || echo "::warning::Changeset check failed, but continuing execution."
+      - name: Release Changeset Coverage
+        if: github.head_ref == 'changeset-release/main'
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.base.sha }}
+          RELEASE_SHA: ${{ github.event.pull_request.head.sha }}
+        run: pnpm check:changesets-coverage --ref "$SOURCE_SHA" --release-ref "$RELEASE_SHA"
       - name: New Publishable Package Check
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
@@ -186,7 +197,9 @@ jobs:
     name: Test Typos
     runs-on: lynx-ubuntu-24.04-medium
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
       - uses: crate-ci/typos@2d0ce569feab1f8752f1dde43cc2f2aa53236e06 # v1.40.0
         with:
           files: .
