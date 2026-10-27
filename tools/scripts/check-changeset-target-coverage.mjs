@@ -184,7 +184,7 @@ function readPullRequestEvent() {
 
 function main() {
   const pullRequest = readPullRequestEvent()
-  const head = process.env.GITHUB_SHA
+  const head = pullRequest.head.sha
   const result = checkChangesetTargetCoverage({
     base: pullRequest.base.sha,
     head,
