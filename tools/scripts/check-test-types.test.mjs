@@ -36,7 +36,7 @@ test('recognizes TypeScript tests in packages, apps, LUNA, and tooling', () => {
   )
 })
 
-test('reports a missing imported type in a test source and ignores source diagnostics', t => {
+test('reports a missing type import in a test source and ignores source diagnostics', t => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lynx-test-types-'))
   t.after(() => fs.rmSync(rootDir, { recursive: true, force: true }))
 
@@ -47,7 +47,7 @@ test('reports a missing imported type in a test source and ignores source diagno
   const testFile = path.join(rootDir, 'regression.test.ts')
   fs.writeFileSync(
     testFile,
-    'import type { Missing } from "./module"\ntype Regression = Missing\n',
+    'type Regression = Missing\n',
   )
   const configPath = path.join(rootDir, 'tsconfig.json')
   fs.writeFileSync(
@@ -69,7 +69,7 @@ test('reports a missing imported type in a test source and ignores source diagno
   assert.ok(
     result.diagnostics.some(
       diagnostic =>
-        diagnostic.code === 2305
+        diagnostic.code === 2304
         && path.resolve(diagnostic.file.fileName) === path.resolve(testFile),
     ),
   )
