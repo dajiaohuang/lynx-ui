@@ -20,6 +20,8 @@ test('recognizes TypeScript tests in packages, apps, LUNA, and tooling', () => {
       'apps/examples/Button/test/component.tsx',
       'luna/packages/luna-stage/src/__tests__/stage.test.tsx',
       'tools/typedoc/runtime-exports.test.ts',
+      'packages/lynx-ui-sortable/__tests__/stable-handlers.test.mts',
+      'tools/typedoc/runtime-exports.test.cts',
     ]
   ) {
     assert.equal(isTypeScriptTestFile(fileName), true, fileName)
